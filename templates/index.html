@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Ecrã de Visualização - Timer / Relógio</title>
+    <!-- Importação de fontes universais do Google Fonts -->
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #000000; /* Fundo sempre preto puro */
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* --- Barra de Topo Dinâmica --- */
+        .topo-marca {
+            position: absolute;
+            top: 4vh;
+            left: 4vw;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0.25; /* Discreto por padrão no modo Timer */
+            transition: opacity 0.4s ease, transform 0.3s ease;
+            user-select: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Quando o Relógio Real está ativo, o topo ganha destaque total */
+        .modo-relogio-ativo .topo-marca {
+            opacity: 1.0 !important; /* Logo 100% visível e brilhante */
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+
+        .topo-marca:hover {
+            opacity: 0.6;
+        }
+
+        .logo-avk {
+            height: 4.5vh;
+            width: auto;
+            object-fit: contain;
+            transition: filter 0.3s ease;
+        }
+
+        .modo-relogio-ativo .logo-avk {
+            filter: drop-shadow(0 0 8px #00f0ff); /* Brilho néon no logo */
+        }
+
+        .texto-avk {
+            font-size: 2.2vh;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #ffffff;
+            transition: color 0.3s ease;
+        }
+
+        .modo-relogio-ativo .texto-avk {
+            color: #00f0ff; /* Texto muda para azul néon */
+        }
+
+        /* --- Contentor do Display --- */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            width: 100vw;
+            user-select: none;
+            transition: all 0.5s ease-in-out;
+        }
+
+        #display {
+            font-size: 24vw;
+            font-weight: bold;
+            line-height: 0.9;
+            transition: color 0.5s ease, font-size 0.5s ease;
+            color: #ffffff;
+        }
+
+        /* Estilo especial para as horas reais */
+        .fonte-relogio {
+            color: #00f0ff !important; /* Horas em Azul Néon futurista */
+            text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+        }
+
+        #mensagem-display {
+            font-size: 5vw;
+            font-weight: bold;
+            color: #00f0ff;
+            margin-top: 5vh;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            min-height: 6vw;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            max-width: 90vw;
+            line-height: 1.2;
+        }
+
+        .mensagem-ativa {
+            opacity: 0.85 !important;
+            transform: translateY(0);
+        }
+
+        /* Se houver mensagem ativa, encolhe o timer e empurra-o para o topo */
+        .comprimir-timer #display {
+            font-size: 11vw !important;
+            opacity: 0.5;
+        }
+
+        .comprimir-timer #mensagem-display {
+            font-size: 9vw !important; /* Mensagem ganha o foco central */
+        }
+
+        /* Cores do Timer */
+        .normal { color: #ffffff !important; }
+        .alerta { color: #eab308 !important; }
+        .critico { color: #ef4444 !important; }
+        .fim {
+            color: #ef4444 !important;
+            animation: blink 1.2s infinite steps(1, end); /* Piscar limpo sincronizado */
+        }
+
+        @keyframes blink { 50% { opacity: 0.0; } } /* Apaga a 100% de forma estúdio */
+    </style>
+</head>
+<body>
+
+    <div class="topo-marca" id="btn-alternar-modo">
+        <img src="/static/logo.png" class="logo-avk" alt="" onerror="this.style.display='none';">
+        <div class="texto-avk" id="lbl-marca-texto">AVK countdown</div>
+    </div>
+
+    <div class="main-container" id="conteudo-painel">
+        <div id="display">05:00</div>
+        <div id="mensagem-display"></div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const msgDisplay = document.getElementById('mensagem-display');
+        const painel = document.getElementById('conteudo-painel');
+        const btnModo = document.getElementById('btn-alternar-modo');
+        const lblTextoMarca = document.getElementById('lbl-marca-texto');
+
+        let modoAtual = "timer";
+
+        const mapaFontes = {
+            "Arial": "Arial, sans-serif",
+            "Impact": "'Anton', sans-serif",
+            "Segoe UI": "'Oswald', sans-serif",
+            "Courier New": "'Share Tech Mono', monospace",
+            "Verdana": "'Orbitron', sans-serif",
+            "Comic Sans MS": "'Rubik Mono One', sans-serif",
+            "Times New Roman": "'Playfair Display', serif"
+        };
+
+        function obterHorasReais() {
+            const agora = new Date();
+            const horas = agora.getHours().toString().padStart(2, '0');
+            const minutos = agora.getMinutes().toString().padStart(2, '0');
+            return `${horas}:${minutos}`;
+        }
+
+        async function atualizarEcra() {
+            try {
+                const resposta = await fetch('/status');
+                const dados = await resposta.json();
+
+                if (dados.modo_web === "relogio") {
+                    modoAtual = "relogio";
+                    document.body.classList.add('modo-relogio-ativo');
+                    lblTextoMarca.textContent = "AVK clock";
+                } else if (dados.modo_web === "timer") {
+                    modoAtual = "timer";
+                    document.body.classList.remove('modo-relogio-ativo');
+                    lblTextoMarca.textContent = "AVK countdown";
+                }
+
+                const fonteWeb = mapaFontes[dados.fonte] || dados.fonte;
+                display.style.fontFamily = fonteWeb;
+
+                if (modoAtual === "relogio") {
+                    display.textContent = obterHorasReais();
+                    display.className = 'fonte-relogio';
+                    msgDisplay.classList.remove('mensagem-ativa');
+                    painel.classList.remove('comprimir-timer');
+                    display.style.color = ""; // Reseta cor fixa no modo relógio
+                } else {
+                    display.textContent = dados.tempo;
+                    display.style.color = ""; // Reseta estilo inline para obedecer ao CSS clássico
+
+                    if (dados.mensagem && dados.mensagem.trim() !== "") {
+                        msgDisplay.textContent = dados.mensagem;
+                        msgDisplay.classList.add('mensagem-ativa');
+                        painel.classList.add('comprimir-timer');
+                        display.className = '';
+                    } else {
+                        msgDisplay.classList.remove('mensagem-ativa');
+                        painel.classList.remove('comprimir-timer');
+                        display.className = '';
+                        // CORREÇÃO CRÍTICA: Corrigido de data.estado para dados.estado
+                        display.classList.add(dados.estado);
+                    }
+                }
+            } catch (erro) {
+                console.log("Erro de ligação.");
+            }
+        }
+
+        btnModo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (modoAtual === "timer") {
+                modoAtual = "relogio";
+                document.body.classList.add('modo-relogio-ativo');
+                lblTextoMarca.textContent = "AVK clock";
+            } else {
+                modoAtual = "timer";
+                document.body.classList.remove('modo-relogio-ativo');
+                lblTextoMarca.textContent = "AVK countdown";
+            }
+            atualizarEcra();
+        });
+
+        // ACELERAÇÃO DE RELÓGIO: Atualiza a cada 250 milissegundos para resposta instantânea
+        setInterval(atualizarEcra, 250);
+
+        document.body.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            }
+        });
+        document.body.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>

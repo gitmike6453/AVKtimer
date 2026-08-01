@@ -1,0 +1,8 @@
+flask
+psutil
+requests
+screeninfo
+pillow
+pystray; sys_platform == "win32"
+tkmacosx; sys_platform == "darwin"
+pyinstaller

@@ -1,0 +1,24 @@
+{
+	"id": "avk-countdown",
+	"name": "AVK Countdown Timer",
+	"shortname": "AVK Timer",
+	"description": "Módulo de controlo oficial para o sistema de temporizador e relógio AVK.",
+	"version": "1.0.0",
+	"license": "MIT",
+	"authors": [
+		"AVK Production <geral@avk.pt>"
+	],
+	"products": [
+		"AVK Countdown App"
+	],
+	"keywords": [
+		"Timer",
+		"Clock",
+		"Countdown",
+		"Studio"
+	],
+	"runtime": {
+		"type": "node-18",
+		"api": "manifest-v3"
+	}
+}
