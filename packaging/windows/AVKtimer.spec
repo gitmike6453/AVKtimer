@@ -1,18 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
 # Build a Windows onefile executable.
-# Run from the repository root: pyinstaller packaging/windows/AVKtimer.spec
+# Invoke from the repository root: pyinstaller packaging/windows/AVKtimer.spec
+# (dist/ and build/ land at the repo root, since those follow the invocation cwd).
+# The Analysis() paths below are relative to THIS FILE's own folder instead
+# (packaging/windows/), which is how PyInstaller resolves paths inside a .spec --
+# not relative to the invocation cwd. Using bare 'avktimer.py' here (matching the
+# comment above) is what broke the Windows CI build twice: PyInstaller looked for
+# packaging/windows/avktimer.py, which doesn't exist [confirmed via the CI failure log].
 
 a = Analysis(
-    ['avktimer.py'],
+    ['../../avktimer.py'],
     pathex=[],
     binaries=[],
     datas=[
-        ('templates', 'templates'),
-        ('static', 'static'),
-        ('assets/app.ico', '.'),
-        ('assets/alarme.mp3', '.'),
-        ('assets/alarme1.mp3', '.'),
-        ('assets/alarme2.mp3', '.'),
+        ('../../templates', 'templates'),
+        ('../../static', 'static'),
+        ('../../assets/app.ico', '.'),
+        ('../../assets/alarme.mp3', '.'),
+        ('../../assets/alarme1.mp3', '.'),
+        ('../../assets/alarme2.mp3', '.'),
     ],
     hiddenimports=[],
     hookspath=[],
@@ -43,5 +49,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['assets/app.ico'],
+    icon=['../../assets/app.ico'],
 )
