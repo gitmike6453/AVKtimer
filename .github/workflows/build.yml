@@ -40,7 +40,16 @@ jobs:
           path: Output/*.exe
 
   macos:
-    runs-on: macos-latest
+    # Fixado em macos-13 (runner Intel) de propósito: "macos-latest" passou a apontar
+    # para runners Apple Silicon (arm64), e o PyInstaller compila só para a arquitetura
+    # nativa da máquina onde corre -- um build feito em arm64 não arranca em Mac Intel.
+    # Um binário Intel corre nativamente em Mac Intel E via Rosetta 2 em Apple Silicon
+    # (M1 a M4), dando um único .dmg universal sem a fragilidade de tentar compilar
+    # universal2 (exigiria wheels universal2 para todas as dependências, nem sempre
+    # disponíveis). Se a Apple deixar de suportar Rosetta ou o runner macos-13 for
+    # descontinuado, terá de se passar para um build universal2 real ou publicar dois
+    # .dmg separados (Intel + Apple Silicon).
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
 
