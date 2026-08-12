@@ -130,6 +130,17 @@ publica os dois como Release no GitHub.
 - Continua a ser preciso, na primeira vez, abrir com botão direito → Abrir (em
   vez de duplo clique) para confirmar a exceção do Gatekeeper.
 
+## v1.9.2 — Corrigido o runner do build macOS (macos-13 foi retirado)
+
+- A v1.9.1 nunca chegou a publicar-se: o job macos ficou preso em fila para
+  sempre porque o runner `macos-13` (Intel) foi retirado pela GitHub em
+  dezembro de 2025. Substituído por `macos-15-intel`, o runner Intel atual.
+- Continua a ser um build Intel de propósito (corre nativamente em Mac Intel e
+  via Rosetta 2 em Apple Silicon M1-M4) — ver comentário em `build.yml`. A
+  GitHub já anunciou o fim do suporte Intel em macOS para depois do
+  `macos-15` ser retirado (previsto outono de 2027); nessa altura é preciso
+  mudar para build universal2 ou publicar dois `.dmg` separados.
+
 ## Por verificar/decidir (não alterado)
 
 - `/api/som/set_webhooks` só permite definir remotamente o webhook H1 (H2/H3 só
