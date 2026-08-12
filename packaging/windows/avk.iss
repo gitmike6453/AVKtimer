@@ -7,19 +7,19 @@
 AppId={{AVKTIMER-STUDIO-V17-WIN}}
 AppName=AVKtimer Studio
 AppPublisher=AVK Studio
-AppVersion=1.9
+AppVersion=1.9.1
 DefaultDirName={autopf}\AVKtimer Studio
-DefaultGroupName=AVKtimer Studio v1.9
+DefaultGroupName=AVKtimer Studio v1.9.1
 AllowNoIcons=yes
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 
-VersionInfoVersion=1.9.0.0
-VersionInfoTextVersion=1.9
+VersionInfoVersion=1.9.1.0
+VersionInfoTextVersion=1.9.1
 
 OutputDir={#RepoRoot}Output
-OutputBaseFilename=AVKtimer_Studio_v1.9_Setup
+OutputBaseFilename=AVKtimer_Studio_v1.9.1_Setup
 SetupIconFile={#RepoRoot}assets\app.ico
 
 [Languages]
@@ -33,8 +33,8 @@ Source: "{#RepoRoot}dist\AVKtimer.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#RepoRoot}assets\app.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\AVKtimer Studio v1.9"; Filename: "{app}\AVKtimer.exe"; IconFilename: "{app}\app.ico"
-Name: "{autodesktop}\AVKtimer Studio v1.9"; Filename: "{app}\AVKtimer.exe"; Tasks: desktopicon; IconFilename: "{app}\app.ico"
+Name: "{group}\AVKtimer Studio v1.9.1"; Filename: "{app}\AVKtimer.exe"; IconFilename: "{app}\app.ico"
+Name: "{autodesktop}\AVKtimer Studio v1.9.1"; Filename: "{app}\AVKtimer.exe"; Tasks: desktopicon; IconFilename: "{app}\app.ico"
 
 [Run]
 Filename: "{app}\AVKtimer.exe"; Description: "{cm:LaunchProgram,AVKtimer Studio}"; Flags: nowait postinstall skipifsilent

@@ -22,6 +22,13 @@ python3 -m PyInstaller --noconfirm --onefile --windowed \
 # Removes the macOS quarantine flag so the unsigned build launches without a Gatekeeper block.
 xattr -cr "dist/${APP_NAME}.app"
 
+# Ad-hoc signs the binary. Apple Silicon (arm64) refuses to run ANY unsigned executable --
+# without this, users see "app is damaged and can't be opened" instead of the milder
+# "unidentified developer" warning. This is not a trusted signature (no Apple Developer
+# account involved) so users still need to right-click > Open the first time; it just
+# avoids the unrecoverable "damaged" failure mode on Apple Silicon Macs.
+codesign --force --deep --sign - "dist/${APP_NAME}.app"
+
 DMG_DIR="dist/dmg_root"
 rm -rf "$DMG_DIR"
 mkdir -p "$DMG_DIR"

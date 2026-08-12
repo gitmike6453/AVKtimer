@@ -116,6 +116,20 @@ publica os dois como Release no GitHub.
   (`packaging/windows/vigia.iss`, `packaging/macos/build_mac_vigia.sh`),
   compilado e publicado pelo mesmo workflow de CI.
 
+## v1.9.1 — Assinatura ad-hoc no build macOS
+
+- No Mac, foi reportado o aviso de segurança do Gatekeeper ao abrir os `.dmg`
+  descarregados. Causa: os builds não são assinados por uma conta Apple Developer
+  (paga), e o macOS marca automaticamente qualquer ficheiro descarregado da
+  internet como "quarentena".
+- Adicionado `codesign --force --deep --sign -` (assinatura ad-hoc, sem custo) a
+  `build_mac.sh` e `build_mac_vigia.sh`, a seguir ao `xattr -cr`. Isto não elimina
+  o aviso "de developer não identificado" — isso só se resolve com notarização
+  Apple real, que exige conta paga — mas evita o modo de falha mais grave em Macs
+  Apple Silicon ("app está danificada", sem botão de contornar nas Definições).
+- Continua a ser preciso, na primeira vez, abrir com botão direito → Abrir (em
+  vez de duplo clique) para confirmar a exceção do Gatekeeper.
+
 ## Por verificar/decidir (não alterado)
 
 - `/api/som/set_webhooks` só permite definir remotamente o webhook H1 (H2/H3 só
@@ -123,3 +137,6 @@ publica os dois como Release no GitHub.
 - `templates/index.html` (visor web) não aplica o campo `tamanho_fonte` devolvido
   por `/status` (só o ecrã de palco nativo o faz) — pode ser intencional (o web usa
   escala responsiva em `vw`); não alterado sem confirmação.
+- Para eliminar por completo o aviso "developer não identificado" no Mac (não só o
+  modo "danificada") é preciso notarização Apple real, o que exige uma conta Apple
+  Developer paga (99$/ano) associada a este projeto — por decidir se vale a pena.

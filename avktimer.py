@@ -87,7 +87,7 @@ if not SISTEMA_MAC:
         pass
 
 root = Tk()
-root.title("AVKtimer v1.9")
+root.title("AVKtimer v1.9.1")
 root.withdraw()
 
 LARGURA_ECRA = root.winfo_screenwidth()

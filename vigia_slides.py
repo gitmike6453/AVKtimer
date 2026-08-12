@@ -130,7 +130,7 @@ def toggle_vigia():
 
 
 root = Tk()
-root.title("AVKtimer — Vigia de Slides v1.0")
+root.title("AVKtimer — Vigia de Slides v1.0.1")
 root.configure(bg="#282a36")
 root.geometry("420x260")
 root.resizable(False, False)

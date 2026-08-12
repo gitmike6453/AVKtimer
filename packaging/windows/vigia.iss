@@ -7,7 +7,7 @@
 AppId={{AVKTIMER-VIGIA-SLIDES-WIN}}
 AppName=AVKtimer Vigia de Slides
 AppPublisher=AVK Studio
-AppVersion=1.0
+AppVersion=1.0.1
 DefaultDirName={autopf}\AVKtimer Vigia de Slides
 DefaultGroupName=AVKtimer Vigia de Slides
 AllowNoIcons=yes
@@ -15,11 +15,11 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 
-VersionInfoVersion=1.0.0.0
-VersionInfoTextVersion=1.0
+VersionInfoVersion=1.0.1.0
+VersionInfoTextVersion=1.0.1
 
 OutputDir={#RepoRoot}Output
-OutputBaseFilename=AVKtimer_VigiaSlides_v1.0_Setup
+OutputBaseFilename=AVKtimer_VigiaSlides_v1.0.1_Setup
 SetupIconFile={#RepoRoot}assets\app.ico
 
 [Languages]

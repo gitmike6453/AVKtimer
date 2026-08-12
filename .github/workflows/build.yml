@@ -52,7 +52,7 @@ jobs:
         run: bash packaging/macos/build_mac.sh "${GITHUB_REF_NAME#v}"
 
       - name: Build Vigia de Slides .app and .dmg
-        run: bash packaging/macos/build_mac_vigia.sh "1.0"
+        run: bash packaging/macos/build_mac_vigia.sh "1.0.1"
 
       - uses: actions/upload-artifact@v4
         with:
