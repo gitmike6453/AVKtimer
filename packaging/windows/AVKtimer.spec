@@ -20,7 +20,7 @@ a = Analysis(
         ('../../assets/alarme1.mp3', '.'),
         ('../../assets/alarme2.mp3', '.'),
     ],
-    hiddenimports=[],
+    hiddenimports=['win32com.client', 'win32com.gen_py', 'win32timezone', 'pythoncom', 'pywintypes'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

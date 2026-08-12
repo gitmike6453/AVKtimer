@@ -79,6 +79,27 @@ instalador Windows (Inno Setup, numa runner `windows-latest`) e o `.dmg` macOS
 (numa runner `macos-latest` — Apple não permite compilar `.app` fora de um Mac) e
 publica os dois como Release no GitHub.
 
+## v1.8 — Lista de Cues + deteção automática de slides
+
+- Novo botão "📋 CUES" abre um painel para criar uma lista de cues (nº de slide +
+  tempo + nome), reordenar, remover e gravar — persistida em
+  `%APPDATA%\AVKtimer\cue_list.json` (macOS: `~/Library/Application Support/AVKtimer`),
+  sobrevive a reinícios da app.
+- Botão **NEXT** avança para a cue seguinte e arranca-a de imediato; também
+  disponível via `/api/cue/next` (Companion/Stream Deck), além de
+  `/api/cue/goto?indice=N`, `/api/cue/list` e `/api/cue/deteccao?ativo=1|0`.
+- **Deteção automática**: com o toggle ligado, a app vigia o PowerPoint (Windows,
+  via COM `SlideShowWindows.View.CurrentShowPosition`) ou o Keynote (macOS, via
+  AppleScript) enquanto a apresentação está a decorrer; ao mudar para um slide com
+  cue associada, carrega o tempo dessa cue e arranca a contagem sozinha.
+- Fixado o número de versão no título da janela (`AVKtimer v1.8`) para nunca mais
+  haver dúvida sobre qual build está a correr.
+- `requirements.txt`: adicionado `pywin32` (só Windows) para a integração COM do
+  PowerPoint.
+- Corrigido o build macOS no CI: `build_mac.sh` estava sempre a nomear o `.dmg`
+  como `v1.7` porque o workflow nunca lhe passava a versão da tag — o `.dmg` fica
+  agora corretamente nomeado a partir da tag do release.
+
 ## Por verificar/decidir (não alterado)
 
 - `/api/som/set_webhooks` só permite definir remotamente o webhook H1 (H2/H3 só

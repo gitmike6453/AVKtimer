@@ -7,7 +7,7 @@ import datetime
 import json
 import subprocess
 import warnings
-from tkinter import Tk, Label, Entry, Button, StringVar, messagebox, Frame, Canvas, Toplevel, Scale
+from tkinter import Tk, Label, Entry, Button, StringVar, messagebox, Frame, Canvas, Toplevel, Scale, Listbox
 from tkinter.ttk import Combobox
 from tkinter import filedialog
 from flask import Flask, render_template, jsonify, request
@@ -52,6 +52,27 @@ def obter_pasta_dados_utilizador():
 
 
 PASTA_DADOS_UTILIZADOR = obter_pasta_dados_utilizador()
+CAMINHO_CUES_JSON = os.path.join(PASTA_DADOS_UTILIZADOR, "cue_list.json")
+
+
+def carregar_lista_cues():
+    """Recupera a lista de cues gravada da última sessão (se existir)."""
+    global lista_cues
+    try:
+        if os.path.exists(CAMINHO_CUES_JSON):
+            with open(CAMINHO_CUES_JSON, "r", encoding="utf-8") as ficheiro:
+                lista_cues = json.load(ficheiro)
+    except Exception as e:
+        print(f"[Cue List] Erro ao carregar lista gravada: {e}")
+
+
+def gravar_lista_cues():
+    """Persiste a lista de cues em disco para sobreviver ao fecho da aplicação."""
+    try:
+        with open(CAMINHO_CUES_JSON, "w", encoding="utf-8") as ficheiro:
+            json.dump(lista_cues, ficheiro, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[Cue List] Erro ao gravar lista: {e}")
 
 # =========================================================================
 # INICIALIZAÇÃO DA INTERFACE GRÁFICA (CÁLCULO DE RESOLUÇÃO E FIXAÇÃO DE ÍCONE)
@@ -66,7 +87,7 @@ if not SISTEMA_MAC:
         pass
 
 root = Tk()
-root.title("AVKtimer")
+root.title("AVKtimer v1.8")
 root.withdraw()
 
 LARGURA_ECRA = root.winfo_screenwidth()
@@ -179,6 +200,15 @@ trig_http_met_3 = "GET"
 enviado_http_1 = False
 enviado_http_2 = False
 enviado_http_3 = False
+
+# =========================================================================
+# LISTA DE CUES: cada cue é {"slide": int, "tempo": segundos, "nome": str}
+# =========================================================================
+lista_cues = []
+indice_cue_atual = -1
+deteccao_automatica_ativa = False
+ultimo_slide_detectado = None
+janela_cues = None
 # =========================================================================
 # DETEÇÃO DE IP E CONFIGURAÇÃO INICIAL DO FLASK
 # =========================================================================
@@ -496,6 +526,48 @@ def api_definir_multi_webhooks():
         return jsonify({"status": "sucesso"})
     except ValueError:
         return jsonify({"status": "erro"})
+
+
+# =========================================================================
+# ROTAS DE API PARA A LISTA DE CUES (NEXT MANUAL + COMPANION/STREAM DECK)
+# =========================================================================
+@app.route('/api/cue/next')
+def api_cue_next():
+    """Avança para a cue seguinte da lista — mesma ação do botão NEXT no painel."""
+    avancar_cue_next()
+    return jsonify({"status": "sucesso"})
+
+
+@app.route('/api/cue/goto')
+def api_cue_goto():
+    """Salta diretamente para a cue de índice indicado (0-based). Ex: /api/cue/goto?indice=2"""
+    try:
+        idx = int(request.args.get('indice', -1))
+        if idx < 0 or idx >= len(lista_cues):
+            return jsonify({"status": "erro", "motivo": "indice fora da lista"})
+        root.after(0, lambda: aplicar_cue(idx))
+        return jsonify({"status": "sucesso"})
+    except Exception as e:
+        return jsonify({"status": "erro", "motivo": str(e)})
+
+
+@app.route('/api/cue/list')
+def api_cue_list():
+    """Devolve a lista de cues atual e qual está ativa, para consumo externo (Companion)."""
+    return jsonify({"cues": lista_cues, "indice_atual": indice_cue_atual})
+
+
+@app.route('/api/cue/deteccao')
+def api_cue_deteccao():
+    """Liga/desliga a deteção automática de slides via rede. Ex: /api/cue/deteccao?ativo=1"""
+    global deteccao_automatica_ativa
+    valor = request.args.get('ativo')
+    if valor is not None:
+        deteccao_automatica_ativa = valor.strip().lower() in ("1", "true", "on", "sim")
+        root.after(0, atualizar_botao_deteccao_ui)
+    return jsonify({"status": "sucesso", "ativo": deteccao_automatica_ativa})
+
+
 # =========================================================================
 # FUNÇÕES DE SUPRESSÃO DE HORAS E AUTOMAÇÃO ASSÍNCRONA HÍBRIDA
 # =========================================================================
@@ -1456,6 +1528,329 @@ def reiniciar_timer():
         print(f"[Régie] REINICIAR: Motor disparado com sucesso para {formatar_tempo_completo(tempo_restante)}.")
     except Exception as e:
         print(f"Erro no reiniciar automático: {str(e)}")
+
+
+# =========================================================================
+# MOTOR DA LISTA DE CUES: NEXT MANUAL + GATILHO AUTOMÁTICO DE SLIDES
+# =========================================================================
+def aplicar_cue(indice, autostart=True):
+    """Carrega o tempo da cue indicada no cronómetro e, por omissão, arranca a contagem de imediato.
+    Deve ser chamada sempre a partir da thread principal do Tkinter (via root.after)."""
+    global tempo_restante, tempo_inicial_memoria, executando, indice_cue_atual, veio_de_stop_manual
+    global som_tocado_trig_1, som_tocado_trig_2, som_tocado_trig_3
+    global enviado_http_1, enviado_http_2, enviado_http_3
+    try:
+        if indice < 0 or indice >= len(lista_cues):
+            return
+        cue = lista_cues[indice]
+        indice_cue_atual = indice
+
+        executando = False
+        veio_de_stop_manual = False
+
+        tempo_restante = max(0, int(cue.get("tempo", 0)))
+        tempo_inicial_memoria = tempo_restante
+
+        h = tempo_restante // 3600
+        m = (tempo_restante % 3600) // 60
+        s = tempo_restante % 60
+        if 'entry_horas' in globals() and entry_horas:
+            entry_horas.delete(0, "end"); entry_horas.insert(0, str(h))
+        if 'entry_minutos' in globals() and entry_minutos:
+            entry_minutos.delete(0, "end"); entry_minutos.insert(0, str(m))
+        if 'entry_segundos' in globals() and entry_segundos:
+            entry_segundos.delete(0, "end"); entry_segundos.insert(0, str(s))
+        if 'lbl_status_tk' in globals() and lbl_status_tk:
+            lbl_status_tk.set(f"Tempo: {formatar_tempo_completo(tempo_restante)}")
+
+        # Liberta os trincos de alarmes/webhooks para poderem disparar de novo nesta cue
+        som_tocado_trig_1 = som_tocado_trig_2 = som_tocado_trig_3 = False
+        enviado_http_1 = enviado_http_2 = enviado_http_3 = False
+
+        if 'aplicar_alertas_customizados' in globals():
+            aplicar_alertas_customizados()
+
+        if autostart:
+            executando = True
+
+        if 'atualizar_janela_cues_lista' in globals():
+            atualizar_janela_cues_lista()
+
+        print(f"[Cue List] Cue #{indice + 1} aplicada -> slide {cue.get('slide')}, {formatar_tempo_completo(tempo_restante)}.")
+    except Exception as e:
+        print(f"[Cue List] Erro ao aplicar cue #{indice + 1}: {e}")
+
+
+def avancar_cue_next():
+    """Avança manualmente para a cue seguinte da lista (botão NEXT no painel ou via Companion)."""
+    global indice_cue_atual
+    if not lista_cues:
+        print("[Cue List] Lista vazia — nada para avançar.")
+        return
+    proximo = indice_cue_atual + 1
+    if proximo >= len(lista_cues):
+        print("[Cue List] Já estás na última cue da lista.")
+        return
+    root.after(0, lambda: aplicar_cue(proximo))
+
+
+def ir_para_cue_por_slide(numero_slide):
+    """Procura a cue cujo número de slide corresponde ao slide atual e aplica-a.
+    Chamada pela thread de deteção automática — despacha para a thread principal."""
+    for i, cue in enumerate(lista_cues):
+        try:
+            if int(cue.get("slide", -1)) == int(numero_slide):
+                root.after(0, lambda idx=i: aplicar_cue(idx, autostart=True))
+                return True
+        except (TypeError, ValueError):
+            continue
+    return False
+
+
+def detetar_slide_powerpoint():
+    """Lê o número do slide atual de uma apresentação em curso no PowerPoint (Windows, via COM).
+    Devolve None se o PowerPoint não estiver aberto ou não estiver a apresentar."""
+    try:
+        import win32com.client
+        aplicacao_ppt = win32com.client.GetActiveObject("PowerPoint.Application")
+        if aplicacao_ppt.SlideShowWindows.Count > 0:
+            return int(aplicacao_ppt.SlideShowWindows(1).View.CurrentShowPosition)
+    except Exception:
+        pass
+    return None
+
+
+def detetar_slide_keynote():
+    """Lê o número do slide atual de uma apresentação em curso no Keynote (macOS, via AppleScript).
+    Devolve None se o Keynote não estiver aberto ou não estiver a apresentar."""
+    try:
+        script_presente = 'tell application "System Events" to (name of processes) contains "Keynote"'
+        resultado = subprocess.run(["osascript", "-e", script_presente], capture_output=True, text=True, timeout=1.5)
+        if "true" not in resultado.stdout.strip().lower():
+            return None
+
+        script_slide = ('tell application "Keynote" to if playing then '
+                         'return slide number of current slide of front document')
+        resultado = subprocess.run(["osascript", "-e", script_slide], capture_output=True, text=True, timeout=1.5)
+        saida = resultado.stdout.strip()
+        if saida.isdigit():
+            return int(saida)
+    except Exception:
+        pass
+    return None
+
+
+def atualizar_botao_deteccao_ui():
+    """Sincroniza o botão e o estado visual da deteção automática no painel de cues."""
+    try:
+        if 'btn_toggle_deteccao' in globals() and btn_toggle_deteccao is not None and btn_toggle_deteccao.winfo_exists():
+            btn_toggle_deteccao.config(
+                text="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA",
+                bg="#22c55e" if deteccao_automatica_ativa else "#4b5563"
+            )
+    except Exception:
+        pass
+
+
+def toggle_deteccao_automatica():
+    """Liga/desliga a vigilância automática do PowerPoint/Keynote a partir do botão no painel de cues."""
+    global deteccao_automatica_ativa, ultimo_slide_detectado
+    deteccao_automatica_ativa = not deteccao_automatica_ativa
+    ultimo_slide_detectado = None
+    atualizar_botao_deteccao_ui()
+    print(f"[Cue List] Deteção automática de slides: {'LIGADA' if deteccao_automatica_ativa else 'DESLIGADA'}.")
+
+
+def loop_deteccao_slides():
+    """Vigia em background o slide atual do PowerPoint (Windows) ou Keynote (Mac) e dispara
+    automaticamente a cue correspondente assim que o operador muda de slide na apresentação."""
+    global ultimo_slide_detectado
+    while True:
+        try:
+            if deteccao_automatica_ativa and lista_cues:
+                slide_atual = detetar_slide_keynote() if SISTEMA_MAC else detetar_slide_powerpoint()
+
+                if slide_atual is not None and slide_atual != ultimo_slide_detectado:
+                    ultimo_slide_detectado = slide_atual
+                    encontrou = ir_para_cue_por_slide(slide_atual)
+                    if 'lbl_deteccao_status' in globals() and lbl_deteccao_status:
+                        texto = f"Slide atual: {slide_atual}" + ("" if encontrou else " (sem cue associada)")
+                        root.after(0, lambda t=texto: lbl_deteccao_status.config(text=t, fg="#50fa7b"))
+                elif slide_atual is None and ultimo_slide_detectado is not None:
+                    ultimo_slide_detectado = None
+                    if 'lbl_deteccao_status' in globals() and lbl_deteccao_status:
+                        root.after(0, lambda: lbl_deteccao_status.config(text="Sem apresentação ativa...", fg="#eab308"))
+        except Exception as e:
+            print(f"[Deteção Slides] Erro assíncrono isolado: {e}")
+        time.sleep(0.4)
+
+
+def atualizar_janela_cues_lista():
+    """Redesenha a listbox de cues, destacando qual está ativa neste momento."""
+    if 'listbox_cues' not in globals() or listbox_cues is None or not listbox_cues.winfo_exists():
+        return
+    try:
+        selecao_anterior = listbox_cues.curselection()
+        listbox_cues.delete(0, "end")
+        for i, cue in enumerate(lista_cues):
+            marcador = "▶ " if i == indice_cue_atual else "   "
+            linha = (f"{marcador}#{i + 1}  Slide {cue.get('slide')}  ·  "
+                     f"{formatar_tempo_completo(int(cue.get('tempo', 0)))}  ·  {cue.get('nome', '')}")
+            listbox_cues.insert("end", linha)
+            listbox_cues.itemconfig(i, fg="#50fa7b" if i == indice_cue_atual else "#f8f8f2")
+        if selecao_anterior:
+            listbox_cues.selection_set(selecao_anterior[0])
+    except Exception:
+        pass
+
+
+def adicionar_cue():
+    """Lê o formulário da janela de cues e acrescenta uma nova cue no fim da lista."""
+    global lista_cues
+    try:
+        slide_txt = entry_cue_slide.get().strip()
+        tempo_txt = entry_cue_tempo.get().strip()
+        nome_txt = entry_cue_nome.get().strip()
+
+        if not slide_txt.isdigit():
+            messagebox.showwarning("Cue inválida", "Indica um número de slide válido.")
+            return
+
+        tempo_segs = converter_string_tempo_para_segundos(tempo_txt)
+        if tempo_segs < 0:
+            messagebox.showwarning("Cue inválida", "Indica um tempo válido (ex: 02:00 ou 90).")
+            return
+
+        lista_cues.append({
+            "slide": int(slide_txt),
+            "tempo": tempo_segs,
+            "nome": nome_txt or f"Cue {len(lista_cues) + 1}"
+        })
+        gravar_lista_cues()
+        atualizar_janela_cues_lista()
+
+        entry_cue_slide.delete(0, "end")
+        entry_cue_tempo.delete(0, "end")
+        entry_cue_nome.delete(0, "end")
+        entry_cue_slide.focus_set()
+    except Exception as e:
+        print(f"[Cue List] Erro ao adicionar cue: {e}")
+
+
+def remover_cue_selecionada():
+    """Remove a cue selecionada na listbox, reajustando o índice da cue ativa se necessário."""
+    global lista_cues, indice_cue_atual
+    try:
+        selecao = listbox_cues.curselection()
+        if not selecao:
+            return
+        idx = selecao[0]
+        del lista_cues[idx]
+        if indice_cue_atual == idx:
+            indice_cue_atual = -1
+        elif indice_cue_atual > idx:
+            indice_cue_atual -= 1
+        gravar_lista_cues()
+        atualizar_janela_cues_lista()
+    except Exception as e:
+        print(f"[Cue List] Erro ao remover cue: {e}")
+
+
+def mover_cue(direcao):
+    """Troca a cue selecionada de posição com a vizinha (direcao=-1 sobe, +1 desce)."""
+    global lista_cues, indice_cue_atual
+    try:
+        selecao = listbox_cues.curselection()
+        if not selecao:
+            return
+        idx = selecao[0]
+        novo_idx = idx + direcao
+        if novo_idx < 0 or novo_idx >= len(lista_cues):
+            return
+        lista_cues[idx], lista_cues[novo_idx] = lista_cues[novo_idx], lista_cues[idx]
+        if indice_cue_atual == idx:
+            indice_cue_atual = novo_idx
+        elif indice_cue_atual == novo_idx:
+            indice_cue_atual = idx
+        gravar_lista_cues()
+        atualizar_janela_cues_lista()
+        listbox_cues.selection_set(novo_idx)
+    except Exception as e:
+        print(f"[Cue List] Erro ao mover cue: {e}")
+
+
+def abrir_janela_cues():
+    """Abre (ou traz para a frente) o painel de gestão da Lista de Cues."""
+    global janela_cues, listbox_cues, entry_cue_slide, entry_cue_tempo, entry_cue_nome
+    global lbl_deteccao_status, btn_toggle_deteccao
+
+    if janela_cues and janela_cues.winfo_exists():
+        janela_cues.lift()
+        return
+
+    janela_cues = Toplevel(root)
+    janela_cues.title("AVK Studio — Lista de Cues")
+    janela_cues.configure(bg="#282a36")
+    janela_cues.geometry("560x640")
+
+    fonte_lbl = ("Arial", calcular_fonte(9), "bold")
+    fonte_entry = ("Arial", calcular_fonte(10))
+
+    frame_form = Frame(janela_cues, bg="#282a36")
+    frame_form.pack(fill="x", padx=14, pady=(14, 6))
+    frame_form.columnconfigure(2, weight=1)
+
+    Label(frame_form, text="Slide Nº", font=fonte_lbl, bg="#282a36", fg="#f8f8f2").grid(row=0, column=0, sticky="w")
+    entry_cue_slide = Entry(frame_form, font=fonte_entry, width=6, justify="center")
+    entry_cue_slide.grid(row=1, column=0, padx=(0, 8), pady=(2, 8))
+
+    Label(frame_form, text="Tempo (mm:ss)", font=fonte_lbl, bg="#282a36", fg="#f8f8f2").grid(row=0, column=1, sticky="w")
+    entry_cue_tempo = Entry(frame_form, font=fonte_entry, width=8, justify="center")
+    entry_cue_tempo.grid(row=1, column=1, padx=(0, 8), pady=(2, 8))
+
+    Label(frame_form, text="Nome da Cue", font=fonte_lbl, bg="#282a36", fg="#f8f8f2").grid(row=0, column=2, sticky="w")
+    entry_cue_nome = Entry(frame_form, font=fonte_entry)
+    entry_cue_nome.grid(row=1, column=2, padx=(0, 8), pady=(2, 8), sticky="ew")
+
+    Button(frame_form, text="+ ADICIONAR", bg="#22c55e", fg="white", font=fonte_lbl, bd=0,
+           command=adicionar_cue).grid(row=1, column=3, ipady=6, sticky="ew")
+
+    listbox_cues = Listbox(janela_cues, font=("Consolas", calcular_fonte(10)), bg="#1e1f29", fg="#f8f8f2",
+                            selectbackground="#00a3ff", activestyle="none", height=14, bd=0, highlightthickness=0)
+    listbox_cues.pack(fill="both", expand=True, padx=14, pady=6)
+
+    frame_gestao = Frame(janela_cues, bg="#282a36")
+    frame_gestao.pack(fill="x", padx=14, pady=(0, 6))
+    frame_gestao.columnconfigure((0, 1, 2), weight=1)
+    Button(frame_gestao, text="▲ SUBIR", bg="#5a5d7a", fg="white", font=fonte_lbl, bd=0,
+           command=lambda: mover_cue(-1)).grid(row=0, column=0, padx=3, ipady=4, sticky="ew")
+    Button(frame_gestao, text="▼ DESCER", bg="#5a5d7a", fg="white", font=fonte_lbl, bd=0,
+           command=lambda: mover_cue(1)).grid(row=0, column=1, padx=3, ipady=4, sticky="ew")
+    Button(frame_gestao, text="🗑 REMOVER", bg="#ff5555", fg="white", font=fonte_lbl, bd=0,
+           command=remover_cue_selecionada).grid(row=0, column=2, padx=3, ipady=4, sticky="ew")
+
+    Button(janela_cues, text="▶ NEXT — aplica e arranca a cue seguinte", bg="#00a3ff", fg="white",
+           font=("Arial", calcular_fonte(12), "bold"), bd=0, command=avancar_cue_next
+           ).pack(fill="x", padx=14, pady=(6, 10), ipady=10)
+
+    Label(janela_cues, text="―" * 60, bg="#282a36", fg="#44475a").pack()
+
+    nome_app_deteccao = "Keynote" if SISTEMA_MAC else "PowerPoint"
+    btn_toggle_deteccao = Button(
+        janela_cues,
+        text="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA",
+        bg="#22c55e" if deteccao_automatica_ativa else "#4b5563", fg="white",
+        font=fonte_lbl, bd=0, command=toggle_deteccao_automatica
+    )
+    btn_toggle_deteccao.pack(fill="x", padx=14, pady=(10, 4), ipady=6)
+
+    lbl_deteccao_status = Label(
+        janela_cues, text=f"Vigia o {nome_app_deteccao} enquanto a apresentação está a decorrer.",
+        font=("Arial", calcular_fonte(8)), bg="#282a36", fg="#62657a", wraplength=520, justify="center"
+    )
+    lbl_deteccao_status.pack(pady=(0, 12))
+
+    atualizar_janela_cues_lista()
 
 
 def toggle_mute_som():
@@ -2442,7 +2837,7 @@ Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Ari
 # =========================================================================
 frame_botoes_acao = Frame(container, bg="#282a36")
 frame_botoes_acao.pack(fill="x", side="top", expand=True, pady=(10, 5), padx=(0, 25 if SISTEMA_MAC else 0))
-frame_botoes_acao.columnconfigure((0, 1, 2, 3, 4), weight=1)
+frame_botoes_acao.columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
 
 pading_botao_core = 8 if SISTEMA_MAC else calcular_pading(8)
 
@@ -2465,6 +2860,10 @@ Button(frame_botoes_acao, text="STOP", bg="#ff5555", fg="white",
 Button(frame_botoes_acao, text="REINICIAR", bg="#00a3ff", fg="white",
        font=("Arial", calcular_fonte(11), "bold"), bd=0, command=reiniciar_timer
 ).grid(row=0, column=4, padx=6, ipady=pading_botao_core, sticky="ew")
+
+Button(frame_botoes_acao, text="📋 CUES", bg="#8b5cf6", fg="white",
+       font=("Arial", calcular_fonte(11), "bold"), bd=0, command=abrir_janela_cues
+).grid(row=0, column=5, padx=6, ipady=pading_botao_core, sticky="ew")
 
 # --- SYSTEM TRAY (PROTEÇÃO HÍBRIDA PARA WINDOWS E MAC) ---
 try:
@@ -2495,9 +2894,12 @@ except Exception:
 # --- ACIONAMENTO FINAL EXCLUSIVO DAS THREADS ASSÍNCRONAS (NÃO REPETIR) ---
 print("\n[AVKtimer Core] A disparar motores assíncronos de estúdio...")
 
+carregar_lista_cues()
+
 threading.Thread(target=iniciar_servidor_flask, daemon=True).start()
 threading.Thread(target=contagem_decrescente, daemon=True).start()
 threading.Thread(target=loop_atualizacao_ecran_nativo, daemon=True).start()
+threading.Thread(target=loop_deteccao_slides, daemon=True).start()
 # 💥 Cloudflare removida de forma limpa aqui para evitar falhas
 
 print("[AVKtimer Core] Motores ativos. A escutar Companion e Browser na porta 4545.\n")

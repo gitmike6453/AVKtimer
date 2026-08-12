@@ -43,7 +43,7 @@ jobs:
           python-version: "3.12"
 
       - name: Build .app and .dmg
-        run: bash packaging/macos/build_mac.sh
+        run: bash packaging/macos/build_mac.sh "${GITHUB_REF_NAME#v}"
 
       - uses: actions/upload-artifact@v4
         with:
