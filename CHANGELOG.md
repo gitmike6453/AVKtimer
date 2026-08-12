@@ -168,6 +168,26 @@ publica os dois como Release no GitHub.
 - `vigia_slides.py` recebeu a mesma paleta e o mesmo rebrand de nome, para
   as duas apps continuarem visualmente consistentes.
 
+## v2.1 — Botões "metal" (gradiente + cantos arredondados + brilho)
+
+- O `tk.Button` normal só pinta cor sólida lisa: sem gradiente, sem cantos
+  arredondados, sem brilho. Feedback: a paleta v2.0 continuava a ler-se
+  "de caixa de lápis de cor" nos botões. Criada a classe `BotaoMetal`
+  (Canvas desenhado à mão): gradiente vertical metálico verde-cyan, cantos
+  arredondados (reaproveitando `criar_retangulo_arredondado`, já usado na
+  moldura da janela), e um contorno a brilhar quando o botão está "ativo".
+  Como o Canvas não tem clip-path nativo, os cantos são "recortados"
+  pintando 4 arcos na cor do painel-pai por cima do gradiente.
+- Aplicado aos botões que mais contam visualmente: os 6 de ação
+  (INICIAR/PAUSAR/ATUALIZAR/STOP/REINICIAR/CUES), ECRÃ:LIGAR/DESLIGAR,
+  PISCAR, SOM e o toggle de Deteção Automática no painel de Cues. Os
+  toggles PISCAR/SOM/DETEÇÃO alternam de facto entre o gradiente escuro
+  (desligado) e o brilhante (ligado) -- `toggle_mute_som()`,
+  `toggle_permissao_piscar()` e `atualizar_botao_deteccao_ui()` passaram a
+  chamar `.set_estado(ativo=..., texto=...)` em vez de `.config(bg=...)`.
+  Os botões pequenos (SET/TEST/M-SET/BUSCAR, dezenas deles) ficaram de
+  fora de propósito -- só a cor sólida da paleta nova, sem o efeito metal.
+
 ## Por verificar/decidir (não alterado)
 
 - `/api/som/set_webhooks` só permite definir remotamente o webhook H1 (H2/H3 só

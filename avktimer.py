@@ -87,7 +87,7 @@ if not SISTEMA_MAC:
         pass
 
 root = Tk()
-root.title("Cue Timer v2.0")
+root.title("Cue Timer v2.1")
 root.withdraw()
 
 LARGURA_ECRA = root.winfo_screenwidth()
@@ -1666,9 +1666,9 @@ def atualizar_botao_deteccao_ui():
     """Sincroniza o botão e o estado visual da deteção automática no painel de cues."""
     try:
         if 'btn_toggle_deteccao' in globals() and btn_toggle_deteccao is not None and btn_toggle_deteccao.winfo_exists():
-            btn_toggle_deteccao.config(
-                text="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA",
-                bg="#0d9488" if deteccao_automatica_ativa else "#334155"
+            btn_toggle_deteccao.set_estado(
+                ativo=deteccao_automatica_ativa,
+                texto="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA"
             )
     except Exception:
         pass
@@ -1858,13 +1858,13 @@ def abrir_janela_cues():
     Label(janela_cues, text="―" * 60, bg="#0b0f1a", fg="#1f2937").pack()
 
     nome_app_deteccao = "Keynote" if SISTEMA_MAC else "PowerPoint"
-    btn_toggle_deteccao = Button(
+    btn_toggle_deteccao = BotaoMetal(
         janela_cues,
         text="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA",
-        bg="#0d9488" if deteccao_automatica_ativa else "#334155", fg="white",
-        font=fonte_lbl, bd=0, command=toggle_deteccao_automatica
+        ativo=deteccao_automatica_ativa, raio=10, fonte=fonte_lbl,
+        height=calcular_fonte(30), bg_pai="#0b0f1a", command=toggle_deteccao_automatica
     )
-    btn_toggle_deteccao.pack(fill="x", padx=14, pady=(10, 4), ipady=6)
+    btn_toggle_deteccao.pack(fill="x", padx=14, pady=(10, 4))
 
     lbl_deteccao_status = Label(
         janela_cues, text=f"Vigia o {nome_app_deteccao} enquanto a apresentação está a decorrer.",
@@ -1879,17 +1879,17 @@ def toggle_mute_som():
     global som_ativado, btn_mute_som
     som_ativado = not som_ativado
     if 'btn_mute_som' in globals() and btn_mute_som is not None:
-        btn_mute_som.config(text="🔊 SOM: ON" if som_ativado else "🔇 SOM: MUTADO",
-                            bg="#0d9488" if som_ativado else "#b91c1c")
+        btn_mute_som.set_estado(ativo=som_ativado,
+                                texto="🔊 SOM: ON" if som_ativado else "🔇 SOM: MUTADO")
 
 
 def toggle_permissao_piscar():
     global permitir_piscar_pos_zero, btn_toggle_piscar
     permitir_piscar_pos_zero = not permitir_piscar_pos_zero
     if 'btn_toggle_piscar' in globals() and btn_toggle_piscar is not None:
-        btn_toggle_piscar.config(
-            text="💥 PISCAR: LIGADO" if permitir_piscar_pos_zero else "🛑 PISCAR: DESLIGADO",
-            bg="#0d9488" if permitir_piscar_pos_zero else "#b91c1c"
+        btn_toggle_piscar.set_estado(
+            ativo=permitir_piscar_pos_zero,
+            texto="💥 PISCAR: LIGADO" if permitir_piscar_pos_zero else "🛑 PISCAR: DESLIGADO"
         )
 
 
@@ -2189,6 +2189,94 @@ canvas.place(x=0, y=0, relwidth=1.0, relheight=1.0)
 def criar_retangulo_arredondado(canvas_obj, x1, y1, x2, y2, raio, **kwargs):
     p = [x1+raio, y1, x1+raio, y1, x2-raio, y1, x2-raio, y1, x2, y1, x2, y1+raio, x2, y1+raio, x2, y2-raio, x2, y2-raio, x2, y2-raio, x2, y2, x2-raio, y2, x2-raio, y2, x1+raio, y2, x1+raio, y2, x1, y2, x1, y2-raio, x1, y2-raio, x1, y1+raio, x1, y1+raio, x1, y1]
     return canvas_obj.create_polygon(p, **kwargs, smooth=True)
+
+
+class BotaoMetal(Canvas):
+    """Botão desenhado à mão em Canvas: cantos arredondados + gradiente metálico
+    vertical (verde-cyan) + brilho quando ativo. Existe porque o tk.Button normal
+    só pinta cor sólida lisa -- sem gradiente, sem cantos redondos, sem brilho.
+    Reutiliza criar_retangulo_arredondado() para o contorno; a máscara dos 4
+    cantos é feita com arcos pintados na cor de fundo do painel-pai, porque o
+    Canvas não tem clip-path nativo."""
+
+    GRAD_ATIVO = ("#1f9d89", "#0d4a41")
+    GRAD_INATIVO = ("#142622", "#0a1614")
+    COR_BORDA = "#162622"
+    COR_BRILHO = "#7ffbe8"
+    COR_TEXTO_ATIVO = "#04120f"
+    COR_TEXTO_INATIVO = "#e3f7f2"
+
+    def __init__(self, parent, text, command=None, ativo=True, raio=12,
+                 fonte=("Arial", 11, "bold"), bg_pai=None, **kwargs):
+        bg_pai = bg_pai or parent["bg"]
+        super().__init__(parent, highlightthickness=0, bg=bg_pai, cursor="hand2", **kwargs)
+        self.command = command
+        self.texto = text
+        self.ativo = ativo
+        self.fonte = fonte
+        self.raio = raio
+        self.bg_pai = bg_pai
+        self._pressionado = False
+        self._em_hover = False
+        self.bind("<Configure>", lambda e: self._desenhar())
+        self.bind("<Button-1>", self._ao_premir)
+        self.bind("<ButtonRelease-1>", self._ao_soltar)
+        self.bind("<Enter>", lambda e: self._hover(True))
+        self.bind("<Leave>", lambda e: self._hover(False))
+
+    def _interpolar(self, cor_a, cor_b, t):
+        ra, ga, ba = self.winfo_rgb(cor_a)
+        rb, gb, bb = self.winfo_rgb(cor_b)
+        r = int(ra + (rb - ra) * t) >> 8
+        g = int(ga + (gb - ga) * t) >> 8
+        b = int(ba + (bb - ba) * t) >> 8
+        return f"#{r:02x}{g:02x}{b:02x}"
+
+    def _desenhar(self):
+        self.delete("all")
+        w, h = self.winfo_width(), self.winfo_height()
+        if w < 6 or h < 6:
+            return
+        topo, base = self.GRAD_ATIVO if self.ativo else self.GRAD_INATIVO
+        if self._em_hover:
+            topo = self._interpolar(topo, "#ffffff", 0.12)
+        for i in range(h):
+            t = i / max(h - 1, 1)
+            self.create_line(0, i, w, i, fill=self._interpolar(topo, base, t))
+
+        r = min(self.raio, w / 2, h / 2)
+        # máscara arredondada: pinta os 4 cantos com a cor do painel-pai por cima do gradiente
+        self.create_arc(-1, -1, 2*r+1, 2*r+1, start=90, extent=90, fill=self.bg_pai, outline=self.bg_pai)
+        self.create_arc(w-2*r-1, -1, w+1, 2*r+1, start=0, extent=90, fill=self.bg_pai, outline=self.bg_pai)
+        self.create_arc(-1, h-2*r-1, 2*r+1, h+1, start=180, extent=90, fill=self.bg_pai, outline=self.bg_pai)
+        self.create_arc(w-2*r-1, h-2*r-1, w+1, h+1, start=270, extent=90, fill=self.bg_pai, outline=self.bg_pai)
+
+        cor_contorno = self.COR_BRILHO if self.ativo else self.COR_BORDA
+        criar_retangulo_arredondado(self, 1, 1, w-1, h-1, raio=r, fill="",
+                                    outline=cor_contorno, width=2 if self.ativo else 1)
+
+        cor_texto = self.COR_TEXTO_ATIVO if self.ativo else self.COR_TEXTO_INATIVO
+        self.create_text(w/2, h/2, text=self.texto, fill=cor_texto, font=self.fonte, justify="center")
+
+    def _hover(self, dentro):
+        self._em_hover = dentro
+        self._desenhar()
+
+    def _ao_premir(self, event):
+        self._pressionado = True
+
+    def _ao_soltar(self, event):
+        premido_dentro = self._pressionado
+        self._pressionado = False
+        if premido_dentro and self.command:
+            self.command()
+
+    def set_estado(self, ativo=None, texto=None):
+        if ativo is not None:
+            self.ativo = ativo
+        if texto is not None:
+            self.texto = texto
+        self._desenhar()
 
 
 def redimensionar_fundo(event):
@@ -2834,17 +2922,25 @@ btn_modo_zero.grid(row=0, column=0, padx=1, pady=2, sticky="nsew", ipady=2)
 btn_alternar_web = Button(frame_botoes_toggle_linha, text="MODO RELÓGIO", bg="#0e7490", fg="#dfe9ec", font=fonte_botoes_trig, bd=0, command=alternar_modo_visualizacao)
 btn_alternar_web.grid(row=0, column=1, padx=1, pady=2, sticky="nsew", ipady=2)
 
-btn_ecran_on = Button(frame_botoes_toggle_linha, text="ECRÃ: LIGAR", bg="#0d9488", fg="white", font=fonte_botoes_trig, bd=0, command=generar_janela_nativa_directx)
-btn_ecran_on.grid(row=0, column=2, padx=1, pady=2, sticky="nsew", ipady=2)
+altura_botao_toggle = calcular_fonte(26)
 
-btn_ecran_off = Button(frame_botoes_toggle_linha, text="ECRÃ: DESLIGAR", bg="#b91c1c", fg="white", font=fonte_botoes_trig, bd=0, command=fechar_ecran_nativo_botao)
-btn_ecran_off.grid(row=0, column=3, padx=1, pady=2, sticky="nsew", ipady=2)
+btn_ecran_on = BotaoMetal(frame_botoes_toggle_linha, text="ECRÃ: LIGAR", command=generar_janela_nativa_directx,
+                          ativo=True, raio=9, fonte=fonte_botoes_trig, height=altura_botao_toggle, bg_pai="#0b0f1a")
+btn_ecran_on.grid(row=0, column=2, padx=1, pady=2, sticky="nsew")
 
-btn_toggle_piscar = Button(frame_botoes_toggle_linha, text="💥 PISCAR", bg="#0d9488", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_permissao_piscar)
-btn_toggle_piscar.grid(row=0, column=4, padx=1, pady=2, sticky="nsew", ipady=2)
+btn_ecran_off = BotaoMetal(frame_botoes_toggle_linha, text="ECRÃ: DESLIGAR", command=fechar_ecran_nativo_botao,
+                           ativo=True, raio=9, fonte=fonte_botoes_trig, height=altura_botao_toggle, bg_pai="#0b0f1a")
+btn_ecran_off.grid(row=0, column=3, padx=1, pady=2, sticky="nsew")
 
-btn_mute_som = Button(frame_botoes_toggle_linha, text="🔊 SOM: ON", bg="#0d9488", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_mute_som)
-btn_mute_som.grid(row=0, column=5, padx=1, pady=2, sticky="nsew", ipady=2)
+btn_toggle_piscar = BotaoMetal(frame_botoes_toggle_linha, text="💥 PISCAR", command=toggle_permissao_piscar,
+                               ativo=permitir_piscar_pos_zero, raio=9, fonte=fonte_botoes_trig,
+                               height=altura_botao_toggle, bg_pai="#0b0f1a")
+btn_toggle_piscar.grid(row=0, column=4, padx=1, pady=2, sticky="nsew")
+
+btn_mute_som = BotaoMetal(frame_botoes_toggle_linha, text="🔊 SOM: ON", command=toggle_mute_som,
+                          ativo=som_ativado, raio=9, fonte=fonte_botoes_trig,
+                          height=altura_botao_toggle, bg_pai="#0b0f1a")
+btn_mute_som.grid(row=0, column=5, padx=1, pady=2, sticky="nsew")
 
 btn_parar_som_emerg = Button(frame_botoes_toggle_linha, text="🛑 PARAR\n SOM", bg="#7f1d1d", fg="white", font=fonte_botoes_trig, bd=0, command=parar_audio_nativo_sistema)
 btn_parar_som_emerg.grid(row=0, column=6, padx=1, pady=2, sticky="nsew", ipady=2)
@@ -2862,30 +2958,32 @@ frame_botoes_acao.pack(fill="x", side="top", expand=True, pady=(10, 5), padx=(0,
 frame_botoes_acao.columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
 
 pading_botao_core = 8 if SISTEMA_MAC else calcular_pading(8)
+altura_botao_core = calcular_fonte(34)
+fonte_botao_core = ("Arial", calcular_fonte(11), "bold")
 
-Button(frame_botoes_acao, text="INICIAR", bg="#0d9488", fg="white",
-       font=("Arial", calcular_fonte(11), "bold"), bd=0, command=iniciar_timer
-).grid(row=0, column=0, padx=6, ipady=pading_botao_core, sticky="ew")
+BotaoMetal(frame_botoes_acao, text="INICIAR", command=iniciar_timer,
+           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=0, padx=6, pady=pading_botao_core, sticky="nsew")
 
-Button(frame_botoes_acao, text="PAUSAR", bg="#b45309", fg="white",
-       font=("Arial", calcular_fonte(11), "bold"), bd=0, command=pausar_timer
-).grid(row=0, column=1, padx=6, ipady=pading_botao_core, sticky="ew")
+BotaoMetal(frame_botoes_acao, text="PAUSAR", command=pausar_timer,
+           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=1, padx=6, pady=pading_botao_core, sticky="nsew")
 
-Button(frame_botoes_acao, text="ATUALIZAR", bg="#0891b2", fg="white",
-       font=("Arial", calcular_fonte(11), "bold"), bd=0, command=executar_override_tempo
-).grid(row=0, column=2, padx=6, ipady=pading_botao_core, sticky="ew")
+BotaoMetal(frame_botoes_acao, text="ATUALIZAR", command=executar_override_tempo,
+           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=2, padx=6, pady=pading_botao_core, sticky="nsew")
 
-Button(frame_botoes_acao, text="STOP", bg="#b91c1c", fg="white",
-       font=("Arial", calcular_fonte(11), "bold"), bd=0, command=parar_timer
-).grid(row=0, column=3, padx=6, ipady=pading_botao_core, sticky="ew")
+BotaoMetal(frame_botoes_acao, text="STOP", command=parar_timer,
+           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=3, padx=6, pady=pading_botao_core, sticky="nsew")
 
-Button(frame_botoes_acao, text="REINICIAR", bg="#0ea5c4", fg="white",
-       font=("Arial", calcular_fonte(11), "bold"), bd=0, command=reiniciar_timer
-).grid(row=0, column=4, padx=6, ipady=pading_botao_core, sticky="ew")
+BotaoMetal(frame_botoes_acao, text="REINICIAR", command=reiniciar_timer,
+           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=4, padx=6, pady=pading_botao_core, sticky="nsew")
 
-Button(frame_botoes_acao, text="📋 CUES", bg="#0891b2", fg="white",
-       font=("Arial", calcular_fonte(11), "bold"), bd=0, command=abrir_janela_cues
-).grid(row=0, column=5, padx=6, ipady=pading_botao_core, sticky="ew")
+BotaoMetal(frame_botoes_acao, text="📋 CUES", command=abrir_janela_cues,
+           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=5, padx=6, pady=pading_botao_core, sticky="nsew")
 
 # --- SYSTEM TRAY (PROTEÇÃO HÍBRIDA PARA WINDOWS E MAC) ---
 try:
