@@ -1,25 +1,28 @@
 ; Windows installer definition (Inno Setup).
-; Expects the onefile build to already exist at <repo-root>\dist\AVKtimer.exe
+; Expects the onefile build to already exist at <repo-root>\dist\CueTimer.exe
 ; (produced by: pyinstaller packaging/windows/AVKtimer.spec, run from the repo root).
 #define RepoRoot SourcePath + "..\..\"
 
 [Setup]
+; AppId mantido igual ao original (não visível ao utilizador) para o Windows
+; continuar a tratar isto como uma atualização do mesmo programa em vez de
+; instalar uma segunda entrada duplicada no Painel de Controlo.
 AppId={{AVKTIMER-STUDIO-V17-WIN}}
-AppName=AVKtimer Studio
+AppName=Cue Timer
 AppPublisher=AVK Studio
-AppVersion=1.9.2
-DefaultDirName={autopf}\AVKtimer Studio
-DefaultGroupName=AVKtimer Studio v1.9.2
+AppVersion=2.0
+DefaultDirName={autopf}\Cue Timer
+DefaultGroupName=Cue Timer v2.0
 AllowNoIcons=yes
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 
-VersionInfoVersion=1.9.2.0
-VersionInfoTextVersion=1.9.2
+VersionInfoVersion=2.0.0.0
+VersionInfoTextVersion=2.0
 
 OutputDir={#RepoRoot}Output
-OutputBaseFilename=AVKtimer_Studio_v1.9.2_Setup
+OutputBaseFilename=CueTimer_Setup_v2.0
 SetupIconFile={#RepoRoot}assets\app.ico
 
 [Languages]
@@ -29,12 +32,12 @@ Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#RepoRoot}dist\AVKtimer.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#RepoRoot}dist\CueTimer.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#RepoRoot}assets\app.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\AVKtimer Studio v1.9.2"; Filename: "{app}\AVKtimer.exe"; IconFilename: "{app}\app.ico"
-Name: "{autodesktop}\AVKtimer Studio v1.9.2"; Filename: "{app}\AVKtimer.exe"; Tasks: desktopicon; IconFilename: "{app}\app.ico"
+Name: "{group}\Cue Timer"; Filename: "{app}\CueTimer.exe"; IconFilename: "{app}\app.ico"
+Name: "{autodesktop}\Cue Timer"; Filename: "{app}\CueTimer.exe"; Tasks: desktopicon; IconFilename: "{app}\app.ico"
 
 [Run]
-Filename: "{app}\AVKtimer.exe"; Description: "{cm:LaunchProgram,AVKtimer Studio}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\CueTimer.exe"; Description: "{cm:LaunchProgram,Cue Timer}"; Flags: nowait postinstall skipifsilent

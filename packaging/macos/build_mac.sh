@@ -4,7 +4,7 @@
 # Run from the repository root: bash packaging/macos/build_mac.sh
 set -euo pipefail
 
-APP_NAME="AVKtimer"
+APP_NAME="CueTimer"
 VERSION="${1:-1.7}"
 
 pip3 install --quiet --upgrade pyinstaller screeninfo flask psutil requests pillow tkmacosx

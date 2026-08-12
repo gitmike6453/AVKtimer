@@ -87,7 +87,7 @@ if not SISTEMA_MAC:
         pass
 
 root = Tk()
-root.title("AVKtimer v1.9.2")
+root.title("Cue Timer v2.0")
 root.withdraw()
 
 LARGURA_ECRA = root.winfo_screenwidth()
@@ -259,14 +259,14 @@ def iniciar_servidor_flask():
     except Exception:
         mensagem_erro = "Erro: Porta de rede bloqueada ou ocupada!"
         if 'lbl_ips_rede' in globals() and lbl_ips_rede is not None:
-            root.after(0, lambda: lbl_ips_rede.config(text=mensagem_erro, fg="#ff5555"))
+            root.after(0, lambda: lbl_ips_rede.config(text=mensagem_erro, fg="#ef4444"))
 
 
 @app.route('/')
 def home():
     user_agent = request.headers.get('User-Agent', '')
     if "Companion" in user_agent or request.args.get('companion') == '1':
-        return jsonify({"status": "online", "dispositivo": "AVK Timer Server"})
+        return jsonify({"status": "online", "dispositivo": "Cue Timer Server"})
 
     try:
         caminho_direto_html = os.path.join(caminho_base, 'templates', 'index.html')
@@ -573,7 +573,7 @@ def api_cue_slide():
         encontrou = ir_para_cue_por_slide(numero)
         if 'lbl_deteccao_status' in globals() and lbl_deteccao_status:
             texto = f"Slide atual (remoto): {numero}" + ("" if encontrou else " (sem cue associada)")
-            root.after(0, lambda t=texto: lbl_deteccao_status.config(text=t, fg="#50fa7b"))
+            root.after(0, lambda t=texto: lbl_deteccao_status.config(text=t, fg="#34d399"))
         return jsonify({"status": "sucesso", "slide": numero, "cue_encontrada": encontrou})
     except Exception as e:
         return jsonify({"status": "erro", "motivo": str(e)})
@@ -702,43 +702,43 @@ def contagem_decrescente():
                         # --- VISORES DE ALARMES DE ÁUDIO (T1, T2, T3) ---
                         if 'lbl_som_feedback1' in globals() and lbl_som_feedback1:
                             if gatilho_som_1 != -1 and tempo_restante >= gatilho_som_1:
-                                lbl_som_feedback1.config(text=f"Falta {tempo_restante - gatilho_som_1}s", fg="#50fa7b")
+                                lbl_som_feedback1.config(text=f"Falta {tempo_restante - gatilho_som_1}s", fg="#34d399")
                             else:
-                                lbl_som_feedback1.config(text="---", fg="#62657a")
+                                lbl_som_feedback1.config(text="---", fg="#7d97a3")
 
                         if 'lbl_som_feedback2' in globals() and lbl_som_feedback2:
                             if gatilho_som_2 != -1 and tempo_restante >= gatilho_som_2:
-                                lbl_som_feedback2.config(text=f"Falta {tempo_restante - gatilho_som_2}s", fg="#50fa7b")
+                                lbl_som_feedback2.config(text=f"Falta {tempo_restante - gatilho_som_2}s", fg="#34d399")
                             else:
-                                lbl_som_feedback2.config(text="---", fg="#62657a")
+                                lbl_som_feedback2.config(text="---", fg="#7d97a3")
 
                         if 'lbl_som_feedback3' in globals() and lbl_som_feedback3:
                             if gatilho_som_3 != -1 and tempo_restante >= gatilho_som_3:
-                                lbl_som_feedback3.config(text=f"Falta {tempo_restante - gatilho_som_3}s", fg="#50fa7b")
+                                lbl_som_feedback3.config(text=f"Falta {tempo_restante - gatilho_som_3}s", fg="#34d399")
                             else:
-                                lbl_som_feedback3.config(text="---", fg="#62657a")
+                                lbl_som_feedback3.config(text="---", fg="#7d97a3")
 
                         # --- VISORES DE REDE HTTP (H1, H2, H3) ---
                         if 'lbl_http_feedback1' in globals() and lbl_http_feedback1:
                             if trig_http_seg_1 != -1 and tempo_restante >= trig_http_seg_1:
                                 lbl_http_feedback1.config(text=f"Falta {tempo_restante - trig_http_seg_1}s",
-                                                          fg="#50fa7b")
+                                                          fg="#34d399")
                             else:
-                                lbl_http_feedback1.config(text="---", fg="#62657a")
+                                lbl_http_feedback1.config(text="---", fg="#7d97a3")
 
                         if 'lbl_http_feedback2' in globals() and lbl_http_feedback2:
                             if trig_http_seg_2 != -1 and tempo_restante >= trig_http_seg_2:
                                 lbl_http_feedback2.config(text=f"Falta {tempo_restante - trig_http_seg_2}s",
-                                                          fg="#50fa7b")
+                                                          fg="#34d399")
                             else:
-                                lbl_http_feedback2.config(text="---", fg="#62657a")
+                                lbl_http_feedback2.config(text="---", fg="#7d97a3")
 
                         if 'lbl_http_feedback3' in globals() and lbl_http_feedback3:
                             if trig_http_seg_3 != -1 and tempo_restante >= trig_http_seg_3:
                                 lbl_http_feedback3.config(text=f"Falta {tempo_restante - trig_http_seg_3}s",
-                                                          fg="#50fa7b")
+                                                          fg="#34d399")
                             else:
-                                lbl_http_feedback3.config(text="---", fg="#62657a")
+                                lbl_http_feedback3.config(text="---", fg="#7d97a3")
                     except Exception:
                         pass
 
@@ -803,7 +803,7 @@ def contagem_decrescente():
 
 
 CORES_FADE_IN_MSG = ["#000000", "#001a1c", "#003338", "#004d54", "#006670", "#00808c", "#0099a8", "#00b3bd", "#00ccd9",
-                     "#00e6f5", "#00f0ff"]
+                     "#00e6f5", "#3fd6ea"]
 CORES_FADE_TIMER_OUT = ["#ffffff", "#e6e6e6", "#cccccc", "#b3b3b3", "#999999", "#808080", "#666666", "#4d4d4d",
                         "#333333", "#262626", "#222222"]
 
@@ -852,7 +852,7 @@ def loop_atualizacao_ecran_nativo():
 
                 if modo_visualizacao == "relogio":
                     agora = datetime.datetime.now().strftime("%H:%M:%S")
-                    janela_secundaria.after(0, lambda: lbl_tempo_secundario.config(text=agora, fg="#00f0ff"))
+                    janela_secundaria.after(0, lambda: lbl_tempo_secundario.config(text=agora, fg="#3fd6ea"))
                 else:
                     tempo_txt = formatar_tempo_completo(tempo_restante)
 
@@ -1036,7 +1036,7 @@ def toggle_fullscreen_painel():
         janela_fullscreen = False
         janela_principal.geometry(f"{LARGURA_JANELA}x{ALTURA_JANELA}+{pos_x}+{pos_y}")
         if 'btn_fullscreen' in globals() and btn_fullscreen is not None:
-            btn_fullscreen.config(text="🗖", fg="#50fa7b")
+            btn_fullscreen.config(text="🗖", fg="#34d399")
 
 
 def alternar_modo_visualizacao():
@@ -1046,11 +1046,11 @@ def alternar_modo_visualizacao():
     if modo_visualizacao == "timer":
         modo_visualizacao = "relogio"
         if 'btn_alternar_web' in globals() and btn_alternar_web is not None:
-            btn_alternar_web.config(text="MUDAR PARA: MODO TIMER", bg="#00a3ff", fg="#000000", font=fonte_toggle)
+            btn_alternar_web.config(text="MUDAR PARA: MODO TIMER", bg="#0ea5c4", fg="#000000", font=fonte_toggle)
     else:
         modo_visualizacao = "timer"
         if 'btn_alternar_web' in globals() and btn_alternar_web is not None:
-            btn_alternar_web.config(text="MUDAR PARA: MODO RELÓGIO", bg="#00f0ff", fg="#000000", font=fonte_toggle)
+            btn_alternar_web.config(text="MUDAR PARA: MODO RELÓGIO", bg="#0e7490", fg="#dfe9ec", font=fonte_toggle)
 
 
 def generar_janela_nativa_directx():
@@ -1061,7 +1061,7 @@ def generar_janela_nativa_directx():
         return
 
     janela_secundaria = Toplevel(root)
-    janela_secundaria.title("AVK Studio Display")
+    janela_secundaria.title("Cue Timer Display")
     janela_secundaria.configure(bg="#000000")
     tamanho_fonte_timer_atual = 150
     estado_mensagem_anterior = ""
@@ -1124,7 +1124,7 @@ def generar_janela_nativa_directx():
 
     frame_conteudo_secundario = Frame(janela_secundaria, bg="#000000")
     lbl_msg_secundaria = Label(frame_conteudo_secundario, text="", font=(fonte_atual, calcular_fonte(55), "bold"),
-                               bg="#000000", fg="#00f0ff", wraplength=1200, justify="center")
+                               bg="#000000", fg="#3fd6ea", wraplength=1200, justify="center")
     lbl_msg_secundaria.pack(expand=False, pady=20)
 
 
@@ -1140,7 +1140,7 @@ def toggle_modo_zero():
     modo_negativo = not modo_negativo
     if 'btn_modo_zero' in globals() and btn_modo_zero is not None:
         btn_modo_zero.config(text="MODO: CONTINUAR NEGATIVO" if modo_negativo else "MODO: PARAR NO ZERO",
-                             bg="#8b5cf6" if modo_negativo else "#4b5563")
+                             bg="#0891b2" if modo_negativo else "#334155")
 
 
 def aplicar_alertas_customizados():
@@ -1668,7 +1668,7 @@ def atualizar_botao_deteccao_ui():
         if 'btn_toggle_deteccao' in globals() and btn_toggle_deteccao is not None and btn_toggle_deteccao.winfo_exists():
             btn_toggle_deteccao.config(
                 text="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA",
-                bg="#22c55e" if deteccao_automatica_ativa else "#4b5563"
+                bg="#0d9488" if deteccao_automatica_ativa else "#334155"
             )
     except Exception:
         pass
@@ -1697,7 +1697,7 @@ def loop_deteccao_slides():
                     encontrou = ir_para_cue_por_slide(slide_atual)
                     if 'lbl_deteccao_status' in globals() and lbl_deteccao_status:
                         texto = f"Slide atual: {slide_atual}" + ("" if encontrou else " (sem cue associada)")
-                        root.after(0, lambda t=texto: lbl_deteccao_status.config(text=t, fg="#50fa7b"))
+                        root.after(0, lambda t=texto: lbl_deteccao_status.config(text=t, fg="#34d399"))
                 elif slide_atual is None and ultimo_slide_detectado is not None:
                     ultimo_slide_detectado = None
                     if 'lbl_deteccao_status' in globals() and lbl_deteccao_status:
@@ -1719,7 +1719,7 @@ def atualizar_janela_cues_lista():
             linha = (f"{marcador}#{i + 1}  Slide {cue.get('slide')}  ·  "
                      f"{formatar_tempo_completo(int(cue.get('tempo', 0)))}  ·  {cue.get('nome', '')}")
             listbox_cues.insert("end", linha)
-            listbox_cues.itemconfig(i, fg="#50fa7b" if i == indice_cue_atual else "#f8f8f2")
+            listbox_cues.itemconfig(i, fg="#34d399" if i == indice_cue_atual else "#dfe9ec")
         if selecao_anterior:
             listbox_cues.selection_set(selecao_anterior[0])
     except Exception:
@@ -1811,64 +1811,64 @@ def abrir_janela_cues():
         return
 
     janela_cues = Toplevel(root)
-    janela_cues.title("AVK Studio — Lista de Cues")
-    janela_cues.configure(bg="#282a36")
+    janela_cues.title("Cue Timer — Lista de Cues")
+    janela_cues.configure(bg="#0b0f1a")
     janela_cues.geometry("560x640")
 
     fonte_lbl = ("Arial", calcular_fonte(9), "bold")
     fonte_entry = ("Arial", calcular_fonte(10))
 
-    frame_form = Frame(janela_cues, bg="#282a36")
+    frame_form = Frame(janela_cues, bg="#0b0f1a")
     frame_form.pack(fill="x", padx=14, pady=(14, 6))
     frame_form.columnconfigure(2, weight=1)
 
-    Label(frame_form, text="Slide Nº", font=fonte_lbl, bg="#282a36", fg="#f8f8f2").grid(row=0, column=0, sticky="w")
+    Label(frame_form, text="Slide Nº", font=fonte_lbl, bg="#0b0f1a", fg="#dfe9ec").grid(row=0, column=0, sticky="w")
     entry_cue_slide = Entry(frame_form, font=fonte_entry, width=6, justify="center")
     entry_cue_slide.grid(row=1, column=0, padx=(0, 8), pady=(2, 8))
 
-    Label(frame_form, text="Tempo (mm:ss)", font=fonte_lbl, bg="#282a36", fg="#f8f8f2").grid(row=0, column=1, sticky="w")
+    Label(frame_form, text="Tempo (mm:ss)", font=fonte_lbl, bg="#0b0f1a", fg="#dfe9ec").grid(row=0, column=1, sticky="w")
     entry_cue_tempo = Entry(frame_form, font=fonte_entry, width=8, justify="center")
     entry_cue_tempo.grid(row=1, column=1, padx=(0, 8), pady=(2, 8))
 
-    Label(frame_form, text="Nome da Cue", font=fonte_lbl, bg="#282a36", fg="#f8f8f2").grid(row=0, column=2, sticky="w")
+    Label(frame_form, text="Nome da Cue", font=fonte_lbl, bg="#0b0f1a", fg="#dfe9ec").grid(row=0, column=2, sticky="w")
     entry_cue_nome = Entry(frame_form, font=fonte_entry)
     entry_cue_nome.grid(row=1, column=2, padx=(0, 8), pady=(2, 8), sticky="ew")
 
-    Button(frame_form, text="+ ADICIONAR", bg="#22c55e", fg="white", font=fonte_lbl, bd=0,
+    Button(frame_form, text="+ ADICIONAR", bg="#0d9488", fg="white", font=fonte_lbl, bd=0,
            command=adicionar_cue).grid(row=1, column=3, ipady=6, sticky="ew")
 
-    listbox_cues = Listbox(janela_cues, font=("Consolas", calcular_fonte(10)), bg="#1e1f29", fg="#f8f8f2",
-                            selectbackground="#00a3ff", activestyle="none", height=14, bd=0, highlightthickness=0)
+    listbox_cues = Listbox(janela_cues, font=("Consolas", calcular_fonte(10)), bg="#0d1220", fg="#dfe9ec",
+                            selectbackground="#0ea5c4", activestyle="none", height=14, bd=0, highlightthickness=0)
     listbox_cues.pack(fill="both", expand=True, padx=14, pady=6)
 
-    frame_gestao = Frame(janela_cues, bg="#282a36")
+    frame_gestao = Frame(janela_cues, bg="#0b0f1a")
     frame_gestao.pack(fill="x", padx=14, pady=(0, 6))
     frame_gestao.columnconfigure((0, 1, 2), weight=1)
-    Button(frame_gestao, text="▲ SUBIR", bg="#5a5d7a", fg="white", font=fonte_lbl, bd=0,
+    Button(frame_gestao, text="▲ SUBIR", bg="#374151", fg="white", font=fonte_lbl, bd=0,
            command=lambda: mover_cue(-1)).grid(row=0, column=0, padx=3, ipady=4, sticky="ew")
-    Button(frame_gestao, text="▼ DESCER", bg="#5a5d7a", fg="white", font=fonte_lbl, bd=0,
+    Button(frame_gestao, text="▼ DESCER", bg="#374151", fg="white", font=fonte_lbl, bd=0,
            command=lambda: mover_cue(1)).grid(row=0, column=1, padx=3, ipady=4, sticky="ew")
-    Button(frame_gestao, text="🗑 REMOVER", bg="#ff5555", fg="white", font=fonte_lbl, bd=0,
+    Button(frame_gestao, text="🗑 REMOVER", bg="#b91c1c", fg="white", font=fonte_lbl, bd=0,
            command=remover_cue_selecionada).grid(row=0, column=2, padx=3, ipady=4, sticky="ew")
 
-    Button(janela_cues, text="▶ NEXT — aplica e arranca a cue seguinte", bg="#00a3ff", fg="white",
+    Button(janela_cues, text="▶ NEXT — aplica e arranca a cue seguinte", bg="#0ea5c4", fg="white",
            font=("Arial", calcular_fonte(12), "bold"), bd=0, command=avancar_cue_next
            ).pack(fill="x", padx=14, pady=(6, 10), ipady=10)
 
-    Label(janela_cues, text="―" * 60, bg="#282a36", fg="#44475a").pack()
+    Label(janela_cues, text="―" * 60, bg="#0b0f1a", fg="#1f2937").pack()
 
     nome_app_deteccao = "Keynote" if SISTEMA_MAC else "PowerPoint"
     btn_toggle_deteccao = Button(
         janela_cues,
         text="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA",
-        bg="#22c55e" if deteccao_automatica_ativa else "#4b5563", fg="white",
+        bg="#0d9488" if deteccao_automatica_ativa else "#334155", fg="white",
         font=fonte_lbl, bd=0, command=toggle_deteccao_automatica
     )
     btn_toggle_deteccao.pack(fill="x", padx=14, pady=(10, 4), ipady=6)
 
     lbl_deteccao_status = Label(
         janela_cues, text=f"Vigia o {nome_app_deteccao} enquanto a apresentação está a decorrer.",
-        font=("Arial", calcular_fonte(8)), bg="#282a36", fg="#62657a", wraplength=520, justify="center"
+        font=("Arial", calcular_fonte(8)), bg="#0b0f1a", fg="#7d97a3", wraplength=520, justify="center"
     )
     lbl_deteccao_status.pack(pady=(0, 12))
 
@@ -1880,7 +1880,7 @@ def toggle_mute_som():
     som_ativado = not som_ativado
     if 'btn_mute_som' in globals() and btn_mute_som is not None:
         btn_mute_som.config(text="🔊 SOM: ON" if som_ativado else "🔇 SOM: MUTADO",
-                            bg="#22c55e" if som_ativado else "#ff5555")
+                            bg="#0d9488" if som_ativado else "#b91c1c")
 
 
 def toggle_permissao_piscar():
@@ -1889,7 +1889,7 @@ def toggle_permissao_piscar():
     if 'btn_toggle_piscar' in globals() and btn_toggle_piscar is not None:
         btn_toggle_piscar.config(
             text="💥 PISCAR: LIGADO" if permitir_piscar_pos_zero else "🛑 PISCAR: DESLIGADO",
-            bg="#22c55e" if permitir_piscar_pos_zero else "#ff5555"
+            bg="#0d9488" if permitir_piscar_pos_zero else "#b91c1c"
         )
 
 
@@ -2158,7 +2158,7 @@ def fechar_aplicacao_seguro():
 # =========================================================================
 
 janela_principal = Toplevel(root)
-janela_principal.title("AVKtimer")
+janela_principal.title("Cue Timer")
 janela_principal.geometry(f"{LARGURA_JANELA}x{ALTURA_JANELA}+{pos_x}+{pos_y}")
 
 # --- AJUSTE DE MOLDURA SEGUNDO O SISTEMA OPERATIVO ---
@@ -2169,10 +2169,10 @@ else:
     # 💻 WINDOWS DRACULA FRAMELESS: Força a remoção total da barra branca do Windows
     janela_principal.overrideredirect(True)
     # Define a cor mágica que o Windows vai recortar para criar os cantos redondos
-    janela_principal.wm_attributes("-transparentcolor", "#1a1a24")
+    janela_principal.wm_attributes("-transparentcolor", "#080b12")
 
 # Define a cor de fundo padrão base
-janela_principal.configure(bg="#282a36" if SISTEMA_MAC else "#1a1a24")
+janela_principal.configure(bg="#0b0f1a" if SISTEMA_MAC else "#080b12")
 
 try:
     caminho_icone = os.path.join(caminho_base, "app.ico")
@@ -2183,7 +2183,7 @@ except Exception:
     pass
 
 # Canvas injetado em modo absolute para desenhar a moldura Drácula com cantos redondos
-canvas = Canvas(janela_principal, bg="#282a36" if SISTEMA_MAC else "#1a1a24", highlightthickness=0)
+canvas = Canvas(janela_principal, bg="#0b0f1a" if SISTEMA_MAC else "#080b12", highlightthickness=0)
 canvas.place(x=0, y=0, relwidth=1.0, relheight=1.0)
 
 def criar_retangulo_arredondado(canvas_obj, x1, y1, x2, y2, raio, **kwargs):
@@ -2197,13 +2197,13 @@ def redimensionar_fundo(event):
         # 🍎 No Mac, removemos as margens (0) e trincas fixas para o layout expandir sem cortar
         criar_retangulo_arredondado(
             canvas, 0, 0, event.width, event.height,
-            raio=20, fill="#112266", outline="#282a36", width=0, tags="fundo_moldura"
+            raio=20, fill="#0b0f1a", outline="#0b0f1a", width=0, tags="fundo_moldura"
         )
     else:
-        # 💻 REPOSIÇÃO WINDOWS: Devolve os cantos arredondados (raio 25) e a borda física outline (#4e5165)
+        # 💻 REPOSIÇÃO WINDOWS: Devolve os cantos arredondados (raio 25) e a borda física outline (#2a3548)
         criar_retangulo_arredondado(
             canvas, 10, 10, event.width-10, event.height-10,
-            raio=25, fill="#282a36", outline="#4e5165", width=4, tags="fundo_moldura"
+            raio=25, fill="#0b0f1a", outline="#2a3548", width=4, tags="fundo_moldura"
         )
         # Força o canvas de fundo a ficar abaixo dos botões para evitar duplicações fantasmas
         canvas.tag_lower("fundo_moldura")
@@ -2212,7 +2212,7 @@ canvas.bind("<Configure>", redimensionar_fundo)
 
 
 # Contentor que flutua elastecidamente respeitando os cantos e margens do estúdio
-container = Frame(janela_principal, bg="#282a36")
+container = Frame(janela_principal, bg="#0b0f1a")
 if SISTEMA_MAC:
     # 🍎 NO MAC: Aumentamos o recuo nas laterais para espremer o conteúdo e nada fugir!
     container.place(x=55, y=35, relwidth=1.0, relheight=1.0, width=-110, height=-70)
@@ -2223,13 +2223,13 @@ else:
 
 
 # Barra de Arraste Superior Customizada (Drag Bar)
-frame_drag = Frame(container, bg="#21222c", height=36)
+frame_drag = Frame(container, bg="#080b12", height=36)
 frame_drag.pack(fill='x', pady=(0, 5))
 frame_drag.pack_propagate(False)
 
-frame_marca = Frame(frame_drag, bg="#21222c")
+frame_marca = Frame(frame_drag, bg="#080b12")
 frame_marca.pack(side="left", padx=10)
-lbl_texto_marca = Label(frame_marca, text="AVK countdown", font=("Arial", 9, "bold"), bg="#21222c", fg="#62657a")
+lbl_texto_marca = Label(frame_marca, text="Cue Timer", font=("Arial", 9, "bold"), bg="#080b12", fg="#7d97a3")
 lbl_texto_marca.pack(side="left")
 # =========================================================================
 # BOTÕES DA BARRA SUPERIOR - ADAPTADOS PARA MOLDURA WINDOWS / MAC NATIVA
@@ -2265,7 +2265,7 @@ def alternar_tamanho_janela_local():
             # Caso contrário, força o Fullscreen Dracula arrancando a barra
             janela_principal.withdraw()
             janela_principal.overrideredirect(True)
-            janela_principal.wm_attributes("-transparentcolor", "#1a1a24")
+            janela_principal.wm_attributes("-transparentcolor", "#080b12")
             janela_principal.geometry(f"{LARGURA_ECRA}x{ALTURA_ECRA}+0+0")
             janela_principal.state('zoomed')
             janela_principal.deiconify()
@@ -2289,8 +2289,8 @@ if not SISTEMA_MAC:
         frame_drag,
         text="✕",
         font=("Arial", calcular_fonte(12), "bold"),
-        bg="#21222c",
-        fg="#ff5555",
+        bg="#080b12",
+        fg="#ef4444",
         bd=0,
         cursor="hand2",
         command=fechar_aplicacao_seguro
@@ -2302,8 +2302,8 @@ if not SISTEMA_MAC:
         frame_drag,
         text="🗗",
         font=("Arial", calcular_fonte(11), "bold"),
-        bg="#21222c",
-        fg="#50fa7b",
+        bg="#080b12",
+        fg="#34d399",
         bd=0,
         cursor="hand2",
         command=alternar_tamanho_janela_local
@@ -2329,8 +2329,8 @@ if not SISTEMA_MAC:
         frame_drag,
         text="🗕",
         font=("Arial", calcular_fonte(11), "bold"),
-        bg="#21222c",
-        fg="#f1fa8c",
+        bg="#080b12",
+        fg="#fde68a",
         bd=0,
         cursor="hand2",
         command=minimizar_painel_seguro
@@ -2349,7 +2349,7 @@ if not SISTEMA_MAC:
             if janela_principal.state() in ['normal', 'zoomed']:
                 janela_principal.overrideredirect(True)
                 janela_principal.state('zoomed')
-                janela_principal.wm_attributes("-transparentcolor", "#1a1a24")
+                janela_principal.wm_attributes("-transparentcolor", "#080b12")
                 if 'btn_fullscreen' in globals() and btn_fullscreen:
                     btn_fullscreen.config(text="🗗")
                 janela_principal.update()
@@ -2363,9 +2363,9 @@ if not SISTEMA_MAC:
 
 else:
     btn_fullscreen = None
-    Label(frame_drag, text=" ", bg="#21222c", width=6).pack(side="left")
+    Label(frame_drag, text=" ", bg="#080b12", width=6).pack(side="left")
 
-lbl_grip = Label(frame_drag, text="═══ ═══", font=("Arial", 10, "bold"), bg="#21222c", fg="#44475a")
+lbl_grip = Label(frame_drag, text="═══ ═══", font=("Arial", 10, "bold"), bg="#080b12", fg="#1f2937")
 lbl_grip.pack(side="right", padx=10, expand=True)
 
 def iniciar_arrasto(event):
@@ -2389,48 +2389,48 @@ lbl_texto_marca.bind("<Button-1>", iniciar_arrasto)
 lbl_texto_marca.bind("<B1-Motion>", mover_janela)
 
 # Barra de Status do Log de Rede do Flask
-frame_ips_topo = Frame(container, bg="#21222c", height=30)
+frame_ips_topo = Frame(container, bg="#080b12", height=30)
 frame_ips_topo.pack(fill="x", pady=(0, 10))
 frame_ips_topo.pack_propagate(False)
 
-lbl_ips_rede = Label(frame_ips_topo, text="A aguardar arranque do servidor web...", font=("Arial", 10, "bold"), bg="#21222c", fg="#62657a")
+lbl_ips_rede = Label(frame_ips_topo, text="A aguardar arranque do servidor web...", font=("Arial", 10, "bold"), bg="#080b12", fg="#7d97a3")
 lbl_ips_rede.pack(expand=True)
 
 # Contentor Principal que divide o corpo nas duas colunas adaptativas
-frame_corpo_colunas = Frame(container, bg="#282a36")
+frame_corpo_colunas = Frame(container, bg="#0b0f1a")
 frame_corpo_colunas.pack(fill="both", expand=True, padx=10)
 
-coluna_esquerda = Frame(frame_corpo_colunas, bg="#282a36")
+coluna_esquerda = Frame(frame_corpo_colunas, bg="#0b0f1a")
 coluna_esquerda.pack(side="left", fill="both", expand=True, padx=(0, 15))
 # =========================================================================
 # LINHA ÚNICA HORIZONTAL GIGANTE: CONFIGURAÇÕES E DEFINIÇÃO DE TEMPO
 # =========================================================================
-frame_linha_tempo_total = Frame(coluna_esquerda, bg="#282a36")
+frame_linha_tempo_total = Frame(coluna_esquerda, bg="#0b0f1a")
 frame_linha_tempo_total.pack(fill="x", anchor="w", pady=(calcular_pading(5), calcular_pading(15)))
 # =========================================================================
 # A. Bloco do Seletor de Fontes e Controlos de Tamanho Local (COMPATÍVEL WIN/MAC)
 # =========================================================================
-frame_fonte_seletor = Frame(frame_linha_tempo_total, bg="#282a36")
+frame_fonte_seletor = Frame(frame_linha_tempo_total, bg="#0b0f1a")
 frame_fonte_seletor.pack(side="left", padx=(0, 5))
 
 # 1. Menu Dropdown da Família da Fonte
-Label(frame_fonte_seletor, text="FONTE:", font=("Arial", calcular_fonte(9), "bold"), bg="#282a36", fg="#f8f8f2").pack(side="left")
+Label(frame_fonte_seletor, text="FONTE:", font=("Arial", calcular_fonte(9), "bold"), bg="#0b0f1a", fg="#dfe9ec").pack(side="left")
 seletor_fontes = Combobox(frame_fonte_seletor, values=["Arial", "Impact", "Segoe UI", "Courier New", "Verdana", "Comic Sans MS", "Times New Roman"], state="readonly", font=("Arial", calcular_fonte(9), "bold"), width=6 if SISTEMA_MAC else 8)
 seletor_fontes.set("Arial")
 seletor_fontes.pack(side="left", padx=3)
 seletor_fontes.bind("<<ComboboxSelected>>", mudar_fonte_interface)
 
-Label(frame_fonte_seletor, text=" ", bg="#282a36", width=1).pack(side="left")
+Label(frame_fonte_seletor, text=" ", bg="#0b0f1a", width=1).pack(side="left")
 
 # 2. Botões de Ajuste de Tamanho ( + / - )
 # No Mac, encolhemos o texto para caber milimetricamente no layout expandido
 tamanho_botoes_txt = 8 if SISTEMA_MAC else 10
 largura_botoes_letra = 24 if SISTEMA_MAC else 3
 
-btn_diminuir_letra = Button(frame_fonte_seletor, text="A-", font=("Arial", tamanho_botoes_txt, "bold"), bg="#44475a", fg="#ff5555", bd=0, width=largura_botoes_letra, command=lambda: alterar_tamanho_fonte_local("minus"))
+btn_diminuir_letra = Button(frame_fonte_seletor, text="A-", font=("Arial", tamanho_botoes_txt, "bold"), bg="#1f2937", fg="#ef4444", bd=0, width=largura_botoes_letra, command=lambda: alterar_tamanho_fonte_local("minus"))
 btn_diminuir_letra.pack(side="left", padx=1)
 
-btn_aumentar_letra = Button(frame_fonte_seletor, text="A+", font=("Arial", tamanho_botoes_txt, "bold"), bg="#44475a", fg="#50fa7b", bd=0, width=largura_botoes_letra, command=lambda: alterar_tamanho_fonte_local("plus"))
+btn_aumentar_letra = Button(frame_fonte_seletor, text="A+", font=("Arial", tamanho_botoes_txt, "bold"), bg="#1f2937", fg="#34d399", bd=0, width=largura_botoes_letra, command=lambda: alterar_tamanho_fonte_local("plus"))
 btn_aumentar_letra.pack(side="left", padx=1)
 
 # 3. Indicador de Leitura de Tamanho Atual (Ex: 150pt)
@@ -2438,97 +2438,97 @@ global lbl_val_tamanho_ui
 if not 'tamanho_fonte_timer_atual' in globals():
     tamanho_fonte_timer_atual = 150
 
-lbl_val_tamanho_ui = Label(frame_fonte_seletor, text=f"{tamanho_fonte_timer_atual}pt", font=("Arial", calcular_fonte(9), "bold"), bg="#343746", fg="#00f0ff", width=5)
+lbl_val_tamanho_ui = Label(frame_fonte_seletor, text=f"{tamanho_fonte_timer_atual}pt", font=("Arial", calcular_fonte(9), "bold"), bg="#141b28", fg="#3fd6ea", width=5)
 lbl_val_tamanho_ui.pack(side="left", padx=4)
 
 
-Label(frame_linha_tempo_total, text="|", font=("Arial", calcular_fonte(12)), bg="#282a36", fg="#44475a").pack(side="left", padx=4)
+Label(frame_linha_tempo_total, text="|", font=("Arial", calcular_fonte(12)), bg="#0b0f1a", fg="#1f2937").pack(side="left", padx=4)
 # =========================================================================
 # PARTE 3: LINHA DE TEMPO, PRESETS DE TEMPO E PAINEL DE MENSAGENS Triplo
 # =========================================================================
 
 # B. Grelha Elástica Unificada: Campos colocados LADO A LADO com os seus respetivos botões (+ / -)
-frame_hms_alinhado = Frame(frame_linha_tempo_total, bg="#282a36")
+frame_hms_alinhado = Frame(frame_linha_tempo_total, bg="#0b0f1a")
 frame_hms_alinhado.pack(side="left", padx=3)
 
 # --- Grupo HORAS ---
-entry_horas = Entry(frame_hms_alinhado, width=3, font=("Arial", calcular_fonte(24), "bold"), bg="#343746", fg="#00f0ff",
-                    bd=0, justify="center", insertbackground="#f8f8f2")
+entry_horas = Entry(frame_hms_alinhado, width=3, font=("Arial", calcular_fonte(24), "bold"), bg="#141b28", fg="#3fd6ea",
+                    bd=0, justify="center", insertbackground="#dfe9ec")
 entry_horas.insert(0, "01")
 entry_horas.pack(side="left", padx=2, ipady=calcular_pading(5))
 entry_horas.bind("<KeyRelease>", lambda e: atualizar_tempo_por_inputs())
 
-Button(frame_hms_alinhado, text="+1H", font=("Arial", calcular_fonte(12), "bold"), bg="#44475a", fg="#f8f8f2",
+Button(frame_hms_alinhado, text="+1H", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
        command=lambda: alterar_horas(1), width=3, bd=0).pack(side="left", padx=1, ipady=calcular_pading(3))
-Button(frame_hms_alinhado, text="-1H", font=("Arial", calcular_fonte(12), "bold"), bg="#44475a", fg="#f8f8f2",
+Button(frame_hms_alinhado, text="-1H", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
        command=lambda: alterar_horas(-1), width=3, bd=0).pack(side="left", padx=(1, 5), ipady=calcular_pading(3))
 
-Label(frame_hms_alinhado, text=":", font=("Arial", calcular_fonte(18), "bold"), bg="#282a36", fg="#f8f8f2").pack(
+Label(frame_hms_alinhado, text=":", font=("Arial", calcular_fonte(18), "bold"), bg="#0b0f1a", fg="#dfe9ec").pack(
     side="left", padx=2)
 
 # --- Grupo MINUTOS ---
-entry_minutos = Entry(frame_hms_alinhado, width=3, font=("Arial", calcular_fonte(24), "bold"), bg="#343746",
-                      fg="#00f0ff", bd=0, justify="center", insertbackground="#f8f8f2")
+entry_minutos = Entry(frame_hms_alinhado, width=3, font=("Arial", calcular_fonte(24), "bold"), bg="#141b28",
+                      fg="#3fd6ea", bd=0, justify="center", insertbackground="#dfe9ec")
 entry_minutos.insert(0, "00")
 entry_minutos.pack(side="left", padx=2, ipady=calcular_pading(5))
 entry_minutos.bind("<KeyRelease>", lambda e: atualizar_tempo_por_inputs())
 
-Button(frame_hms_alinhado, text="+1M", font=("Arial", calcular_fonte(12), "bold"), bg="#44475a", fg="#f8f8f2",
+Button(frame_hms_alinhado, text="+1M", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
        command=lambda: alterar_minutos(1), width=3, bd=0).pack(side="left", padx=1, ipady=calcular_pading(3))
-Button(frame_hms_alinhado, text="-1M", font=("Arial", calcular_fonte(12), "bold"), bg="#44475a", fg="#f8f8f2",
+Button(frame_hms_alinhado, text="-1M", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
        command=lambda: alterar_minutos(-1), width=3, bd=0).pack(side="left", padx=(1, 5), ipady=calcular_pading(3))
 
-Label(frame_hms_alinhado, text=":", font=("Arial", calcular_fonte(18), "bold"), bg="#282a36", fg="#f8f8f2").pack(
+Label(frame_hms_alinhado, text=":", font=("Arial", calcular_fonte(18), "bold"), bg="#0b0f1a", fg="#dfe9ec").pack(
     side="left", padx=2)
 
 # --- Grupo SEGUNDOS ---
-entry_segundos = Entry(frame_hms_alinhado, width=3, font=("Arial", calcular_fonte(24), "bold"), bg="#343746",
-                       fg="#00f0ff", bd=0, justify="center", insertbackground="#f8f8f2")
+entry_segundos = Entry(frame_hms_alinhado, width=3, font=("Arial", calcular_fonte(24), "bold"), bg="#141b28",
+                       fg="#3fd6ea", bd=0, justify="center", insertbackground="#dfe9ec")
 entry_segundos.insert(0, "00")
 entry_segundos.pack(side="left", padx=2, ipady=calcular_pading(5))
 entry_segundos.bind("<KeyRelease>", lambda e: atualizar_tempo_por_inputs())
 
-Button(frame_hms_alinhado, text="+5S", font=("Arial", calcular_fonte(12), "bold"), bg="#44475a", fg="#f8f8f2",
+Button(frame_hms_alinhado, text="+5S", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
        command=lambda: alterar_segundos(5), width=3, bd=0).pack(side="left", padx=1, ipady=calcular_pading(3))
-Button(frame_hms_alinhado, text="-5S", font=("Arial", calcular_fonte(12), "bold"), bg="#44475a", fg="#f8f8f2",
+Button(frame_hms_alinhado, text="-5S", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
        command=lambda: alterar_segundos(-5), width=3, bd=0).pack(side="left", padx=1, ipady=calcular_pading(3))
 
-Label(frame_linha_tempo_total, text="|", font=("Arial", calcular_fonte(12)), bg="#282a36", fg="#44475a").pack(
+Label(frame_linha_tempo_total, text="|", font=("Arial", calcular_fonte(12)), bg="#0b0f1a", fg="#1f2937").pack(
     side="left", padx=4)
 
 # C. Inputs de Minutos de Alerta Customizados no Fim da Mesma Linha
-frame_alertas_linha = Frame(frame_linha_tempo_total, bg="#282a36")
+frame_alertas_linha = Frame(frame_linha_tempo_total, bg="#0b0f1a")
 frame_alertas_linha.pack(side="left", padx=(3, 0))
 
-Label(frame_alertas_linha, text="⚠️ AMAR:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#eab308").grid(
+Label(frame_alertas_linha, text="⚠️ AMAR:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#eab308").grid(
     row=0, column=0, padx=1)
-entry_alerta_amarelo = Entry(frame_alertas_linha, width=3, font=("Arial", calcular_fonte(15), "bold"), bg="#343746",
-                             fg="#eab308", bd=0, justify="center", insertbackground="#f8f8f2")
+entry_alerta_amarelo = Entry(frame_alertas_linha, width=3, font=("Arial", calcular_fonte(15), "bold"), bg="#141b28",
+                             fg="#eab308", bd=0, justify="center", insertbackground="#dfe9ec")
 entry_alerta_amarelo.insert(0, "3")
 entry_alerta_amarelo.grid(row=0, column=1, padx=2, ipady=calcular_pading(3))
 
-Label(frame_alertas_linha, text="🚨 VERM:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#ef4444").grid(
+Label(frame_alertas_linha, text="🚨 VERM:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#ef4444").grid(
     row=0, column=2, padx=(5, 1))
-entry_alerta_vermelho = Entry(frame_alertas_linha, width=3, font=("Arial", calcular_fonte(15), "bold"), bg="#343746",
-                              fg="#ef4444", bd=0, justify="center", insertbackground="#f8f8f2")
+entry_alerta_vermelho = Entry(frame_alertas_linha, width=3, font=("Arial", calcular_fonte(15), "bold"), bg="#141b28",
+                              fg="#ef4444", bd=0, justify="center", insertbackground="#dfe9ec")
 entry_alerta_vermelho.insert(0, "1")
 entry_alerta_vermelho.grid(row=0, column=3, padx=2, ipady=calcular_pading(3))
 
 # Contentor do Andar do Meio das Duas Colunas Adaptativas
-frame_corpo_medio = Frame(container, bg="#282a36")
+frame_corpo_medio = Frame(container, bg="#0b0f1a")
 frame_corpo_medio.pack(fill="both", expand=True, padx=15, pady=5)
 
-sub_col_esquerda = Frame(frame_corpo_medio, bg="#282a36")
+sub_col_esquerda = Frame(frame_corpo_medio, bg="#0b0f1a")
 sub_col_esquerda.pack(side="left", fill="both", expand=True, padx=(0, 10))
 
 # =========================================================================
 # GRELHA ELÁSTICA DE PRESETS RÁPIDOS DE TEMPO (ADAPTATIVA)
 # =========================================================================
 lbl_presets = Label(sub_col_esquerda, text="PRESETS RÁPIDOS DE TEMPO:", font=("Arial", calcular_fonte(9), "bold"),
-                    bg="#282a36", fg="#f8f8f2")
+                    bg="#0b0f1a", fg="#dfe9ec")
 lbl_presets.pack(anchor="w", pady=(2, 2))
 
-frame_grid_presets = Frame(sub_col_esquerda, bg="#282a36")
+frame_grid_presets = Frame(sub_col_esquerda, bg="#0b0f1a")
 frame_grid_presets.pack(fill="both", expand=True, anchor="w")
 
 for c in range(5):
@@ -2542,7 +2542,7 @@ btn_reset_avktimer = Button(
     frame_comandos_principais if 'frame_comandos_principais' in globals() else container,
     text="🔄 RESET",
     font=("Arial", calcular_fonte(12), "bold") if 'calcular_fonte' in globals() else ("Arial", 12, "bold"),
-    bg="#eab308",
+    bg="#b45309",
     fg="#000000",
     bd=0,
     command=forcar_reset_timer_via_botao
@@ -2570,22 +2570,22 @@ def capturar_para_preset(idx):
 # Desenha as duas linhas de botões (SET superior e Disparo de tempo inferior)
 for i in range(10):
     l, c = (i // 5) * 2, i % 5
-    Button(frame_grid_presets, text="SET", font=("Arial", calcular_fonte(7), "bold"), bg="#5a5d7a", fg="#f8f8f2", bd=0,
+    Button(frame_grid_presets, text="SET", font=("Arial", calcular_fonte(7), "bold"), bg="#374151", fg="#dfe9ec", bd=0,
            command=lambda idx=i: capturar_para_preset(idx)).grid(row=l, column=c, padx=3, pady=(1, 1), ipady=1,
                                                                  sticky="ew")
     bp = Button(frame_grid_presets, text=etiquetas_iniciais[i], font=("Arial", calcular_fonte(10), "bold"),
-                bg="#3d4155", fg="#00f0ff", bd=0, command=lambda idx=i: aplicar_preset_index(idx))
+                bg="#1a2333", fg="#3fd6ea", bd=0, command=lambda idx=i: aplicar_preset_index(idx))
     bp.grid(row=l + 1, column=c, padx=3, pady=(1, 4), ipady=calcular_pading(8), sticky="ew")
     botoes_presets_referencias.append(bp)
 # =========================================================================
 # ⏱️ NOVO VISOR DE PREVIEW DO RELÓGIO (MONITORIZAÇÃO DA RÉGIE ISOLADA)
 # =========================================================================
-Label(sub_col_esquerda, text="―" * 35, font=("Arial", calcular_fonte(8)), bg="#282a36", fg="#44475a").pack(fill="x", pady=(5, 2))
+Label(sub_col_esquerda, text="―" * 35, font=("Arial", calcular_fonte(8)), bg="#0b0f1a", fg="#1f2937").pack(fill="x", pady=(5, 2))
 
-lbl_tit_preview = Label(sub_col_esquerda, text="⏱️ MONITOR DE CONTAGEM REGRESSIVA:", font=("Arial", calcular_fonte(9), "bold"), bg="#282a36", fg="#f8f8f2")
+lbl_tit_preview = Label(sub_col_esquerda, text="⏱️ MONITOR DE CONTAGEM REGRESSIVA:", font=("Arial", calcular_fonte(9), "bold"), bg="#0b0f1a", fg="#dfe9ec")
 lbl_tit_preview.pack(anchor="w", pady=(2, 4))
 
-frame_visor_preview = Frame(sub_col_esquerda, bg="#21222c", bd=0)
+frame_visor_preview = Frame(sub_col_esquerda, bg="#080b12", bd=0)
 frame_visor_preview.pack(fill="both", expand=True, ipady=15, pady=(2, 5))
 
 # 💥 INJEÇÃO DE VARIÁVEL EXCLUSIVA DA RÉGIE (Acaba com os fantasmas e colisões!)
@@ -2596,8 +2596,8 @@ lbl_tempo_preview = Label(
     frame_visor_preview,
     textvariable=lbl_preview_regie_tk,
     font=("Arial", calcular_fonte(32), "bold"),
-    bg="#21222c",
-    fg="#00f0ff"
+    bg="#080b12",
+    fg="#3fd6ea"
 )
 lbl_tempo_preview.pack(expand=True, fill="both")
 
@@ -2605,7 +2605,7 @@ lbl_tempo_preview.pack(expand=True, fill="both")
 # =========================================================================
 # ABRIR SUBCOLUNA DA DIREITA PARA MENSAGENS E GATILHOS
 # =========================================================================
-sub_col_direita = Frame(frame_corpo_medio, bg="#282a36")
+sub_col_direita = Frame(frame_corpo_medio, bg="#0b0f1a")
 sub_col_direita.pack(side="right", fill="both", expand=True, padx=(10, 0))
 
 
@@ -2633,30 +2633,30 @@ def atualizar_estilo_botao_msg(botao, texto):
 
 
 lbl_tit_msg = Label(sub_col_direita, text="MENSAGEM EM TEMPO REAL:", font=("Arial", calcular_fonte(9), "bold"),
-                    bg="#282a36", fg="#f8f8f2")
+                    bg="#0b0f1a", fg="#dfe9ec")
 lbl_tit_msg.pack(anchor="w", pady=(2, 2))
 
-frame_msg_row = Frame(sub_col_direita, bg="#282a36")
+frame_msg_row = Frame(sub_col_direita, bg="#0b0f1a")
 frame_msg_row.pack(fill="x", anchor="w", pady=1)
 frame_msg_row.columnconfigure(0, weight=3)
 frame_msg_row.columnconfigure((1, 2), weight=1)
 
-entry_mensagem = Entry(frame_msg_row, font=("Arial", calcular_fonte(11), "bold"), bg="#343746", fg="#00f0ff", bd=0,
-                       insertbackground="#f8f8f2")
+entry_mensagem = Entry(frame_msg_row, font=("Arial", calcular_fonte(11), "bold"), bg="#141b28", fg="#3fd6ea", bd=0,
+                       insertbackground="#dfe9ec")
 entry_mensagem.grid(row=0, column=0, padx=(0, 4), ipady=calcular_pading(4), sticky="ew")
 
-btn_enviar_msg = Button(frame_msg_row, text="ENVIAR", font=("Arial", calcular_fonte(8), "bold"), bg="#22c55e",
+btn_enviar_msg = Button(frame_msg_row, text="ENVIAR", font=("Arial", calcular_fonte(8), "bold"), bg="#0d9488",
                         fg="white", bd=0, command=enviar_mensagem_ecra)
 btn_enviar_msg.grid(row=0, column=1, padx=2, sticky="nsew")
 
-btn_limpar_msg = Button(frame_msg_row, text="LIMPAR", font=("Arial", calcular_fonte(8), "bold"), bg="#ff5555",
+btn_limpar_msg = Button(frame_msg_row, text="LIMPAR", font=("Arial", calcular_fonte(8), "bold"), bg="#b91c1c",
                         fg="white", bd=0, command=limpar_mensagem_ecra)
 btn_limpar_msg.grid(row=0, column=2, padx=(2, 0), sticky="nsew")
 
 # =========================================================================
 # GRELHA DE PRESETS DE MENSAGENS RÁPIDAS (ADAPTATIVA 5 COLUNAS)
 # =========================================================================
-frame_grelha_msg_presets = Frame(sub_col_direita, bg="#282a36")
+frame_grelha_msg_presets = Frame(sub_col_direita, bg="#0b0f1a")
 frame_grelha_msg_presets.pack(fill="both", expand=True, anchor="w", pady=(5, 0))
 
 # Força a distribuição elástica de 5 colunas iguais para as mensagens
@@ -2671,14 +2671,14 @@ for i in range(10):
     l, c = (i // 5) * 2, i % 5
 
     # Botão superior para CAPTURAR o texto atual da entry_mensagem para o preset
-    Button(frame_grelha_msg_presets, text="M-SET", font=("Arial", calcular_fonte(7), "bold"), bg="#5a5d7a",
-           fg="#f8f8f2", bd=0,
+    Button(frame_grelha_msg_presets, text="M-SET", font=("Arial", calcular_fonte(7), "bold"), bg="#374151",
+           fg="#dfe9ec", bd=0,
            command=lambda idx=i: capturar_preset_msg(idx)).grid(row=l, column=c, padx=2, pady=(1, 1), ipady=1,
                                                                 sticky="ew")
 
     # Garante que o teu botão bm vai buscar o texto de arranque à tua nova lista:
     bm = Button(frame_grelha_msg_presets, text=textos_presets_msg[i], font=("Arial", calcular_fonte(9), "bold"),
-                bg="#3d4155", fg="#00f0ff", bd=0, command=lambda idx=i: disparar_preset_msg(idx))
+                bg="#1a2333", fg="#3fd6ea", bd=0, command=lambda idx=i: disparar_preset_msg(idx))
 
     bm.grid(row=l + 1, column=c, padx=2, pady=(1, 4), ipady=calcular_pading(6), sticky="nsew")
 
@@ -2688,7 +2688,7 @@ for i in range(10):
 # GRELHA CORPORATIVA ELÁSTICA (CORREÇÃO DE COR TRANS-COLOR v1.3)
 # =========================================================================
 # 💥 MUDANÇA: O frame-mãe assume o bg Dracula para tapar o furo do Windows
-frame_matriz_direita = Frame(sub_col_direita, bg="#282a36")
+frame_matriz_direita = Frame(sub_col_direita, bg="#0b0f1a")
 frame_matriz_direita.pack(fill="both", expand=True, padx=5, pady=2)
 
 frame_matriz_direita.columnconfigure((0, 1, 2, 4, 5), weight=0)
@@ -2702,13 +2702,13 @@ largura_url_char = 8 if SISTEMA_MAC else 20
 ## ─────────────────────────────────────────────────────────────────────────
 # SECTOR 1: ⏱️ ALARMES INDEPENDENTES DE ÁUDIO (VERSÃO BROADCAST COMPILADA)
 # ─────────────────────────────────────────────────────────────────────────
-Label(frame_matriz_direita, text="⏱️ ALARMES SONOROS (DIGITE OU COLOQUE MM:SS):", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#62657a").grid(row=0, column=0, columnspan=6, sticky="w", pady=(2, 6))
+Label(frame_matriz_direita, text="⏱️ ALARMES SONOROS (DIGITE OU COLOQUE MM:SS):", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#7d97a3").grid(row=0, column=0, columnspan=6, sticky="w", pady=(2, 6))
 
 lista_sons_regie = ["Beep", "Alarme 1", "Alarme 2", "Sinal Horário", "Fim de Tempo"]
 
 # --- LINHA T1 ---
-Label(frame_matriz_direita, text="T1:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#00f0ff").grid(row=1, column=0, padx=2, pady=3, sticky="w")
-entry_trig_som1 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#343746", fg="#00f0ff", bd=0, justify="center")
+Label(frame_matriz_direita, text="T1:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=1, column=0, padx=2, pady=3, sticky="w")
+entry_trig_som1 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#141b28", fg="#3fd6ea", bd=0, justify="center")
 entry_trig_som1.grid(row=1, column=1, padx=2, ipady=2, sticky="ew")
 entry_trig_som1.bind("<KeyRelease>", lambda e: atualizar_gatilhos_som_via_painel())
 
@@ -2717,14 +2717,14 @@ seletor_som_t1.set("Beep") # 💥 FIXA O BEEP DE ARRANQUE PARA NÃO FICAR EM BRA
 seletor_som_t1.grid(row=1, column=2, padx=2, sticky="ew")
 seletor_som_t1.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_som_via_painel())
 
-Button(frame_matriz_direita, text="BUSCAR 1", font=fonte_botoes_pequenos, bg="#8b5cf6", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(1)).grid(row=1, column=3, padx=2, sticky="nsew", ipady=1)
-lbl_som_feedback1 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#343746", fg="#62657a", width=10)
+Button(frame_matriz_direita, text="BUSCAR 1", font=fonte_botoes_pequenos, bg="#0891b2", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(1)).grid(row=1, column=3, padx=2, sticky="nsew", ipady=1)
+lbl_som_feedback1 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_som_feedback1.grid(row=1, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#5a5d7a", fg="#f8f8f2", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(1,), daemon=True).start()).grid(row=1, column=5, padx=2, sticky="nsew")
+Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(1,), daemon=True).start()).grid(row=1, column=5, padx=2, sticky="nsew")
 
 # --- LINHA T2 ---
-Label(frame_matriz_direita, text="T2:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#00f0ff").grid(row=2, column=0, padx=2, pady=3, sticky="w")
-entry_trig_som2 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#343746", fg="#00f0ff", bd=0, justify="center")
+Label(frame_matriz_direita, text="T2:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=2, column=0, padx=2, pady=3, sticky="w")
+entry_trig_som2 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#141b28", fg="#3fd6ea", bd=0, justify="center")
 entry_trig_som2.grid(row=2, column=1, padx=2, ipady=2, sticky="ew")
 entry_trig_som2.bind("<KeyRelease>", lambda e: atualizar_gatilhos_som_via_painel())
 
@@ -2733,14 +2733,14 @@ seletor_som_t2.set("Beep") # 💥 FIXA O BEEP DE ARRANQUE PARA NÃO FICAR EM BRA
 seletor_som_t2.grid(row=2, column=2, padx=2, sticky="ew")
 seletor_som_t2.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_som_via_painel())
 
-Button(frame_matriz_direita, text="BUSCAR 2", font=fonte_botoes_pequenos, bg="#8b5cf6", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(2)).grid(row=2, column=3, padx=2, sticky="nsew", ipady=1)
-lbl_som_feedback2 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#343746", fg="#62657a", width=10)
+Button(frame_matriz_direita, text="BUSCAR 2", font=fonte_botoes_pequenos, bg="#0891b2", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(2)).grid(row=2, column=3, padx=2, sticky="nsew", ipady=1)
+lbl_som_feedback2 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_som_feedback2.grid(row=2, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#5a5d7a", fg="#f8f8f2", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(2,), daemon=True).start()).grid(row=2, column=5, padx=2, sticky="nsew")
+Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(2,), daemon=True).start()).grid(row=2, column=5, padx=2, sticky="nsew")
 
 # --- LINHA T3 ---
-Label(frame_matriz_direita, text="T3:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#00f0ff").grid(row=3, column=0, padx=2, pady=3, sticky="w")
-entry_trig_som3 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#343746", fg="#00f0ff", bd=0, justify="center")
+Label(frame_matriz_direita, text="T3:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=3, column=0, padx=2, pady=3, sticky="w")
+entry_trig_som3 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#141b28", fg="#3fd6ea", bd=0, justify="center")
 entry_trig_som3.grid(row=3, column=1, padx=2, ipady=2, sticky="ew")
 entry_trig_som3.bind("<KeyRelease>", lambda e: atualizar_gatilhos_som_via_painel())
 
@@ -2749,22 +2749,22 @@ seletor_som_t3.set("Beep") # 💥 FIXA O BEEP DE ARRANQUE PARA NÃO FICAR EM BRA
 seletor_som_t3.grid(row=3, column=2, padx=2, sticky="ew")
 seletor_som_t3.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_som_via_painel())
 
-Button(frame_matriz_direita, text="BUSCAR 3", font=fonte_botoes_pequenos, bg="#8b5cf6", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(3)).grid(row=3, column=3, padx=2, sticky="nsew", ipady=1)
-lbl_som_feedback3 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#343746", fg="#62657a", width=10)
+Button(frame_matriz_direita, text="BUSCAR 3", font=fonte_botoes_pequenos, bg="#0891b2", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(3)).grid(row=3, column=3, padx=2, sticky="nsew", ipady=1)
+lbl_som_feedback3 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_som_feedback3.grid(row=3, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#5a5d7a", fg="#f8f8f2", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(3,), daemon=True).start()).grid(row=3, column=5, padx=2, sticky="nsew")
+Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(3,), daemon=True).start()).grid(row=3, column=5, padx=2, sticky="nsew")
 
 # Divisória de Estúdio
-Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#282a36", fg="#44475a").grid(row=4, column=0, columnspan=6, pady=4)
+Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#0b0f1a", fg="#1f2937").grid(row=4, column=0, columnspan=6, pady=4)
 
 # ─────────────────────────────────────────────────────────────────────────
-# SECTOR 2: 🌐 AUTOMACÃO HTTP EXTERNA (bg corrigido para #282a36)
+# SECTOR 2: 🌐 AUTOMACÃO HTTP EXTERNA (bg corrigido para #0b0f1a)
 # ─────────────────────────────────────────────────────────────────────────
-Label(frame_matriz_direita, text="🌐 AUTOMAÇÃO WEB HTTP EXTERNA:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#62657a").grid(row=5, column=0, columnspan=6, sticky="w", pady=(2, 6))
+Label(frame_matriz_direita, text="🌐 AUTOMAÇÃO WEB HTTP EXTERNA:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#7d97a3").grid(row=5, column=0, columnspan=6, sticky="w", pady=(2, 6))
 
 # --- LINHA H1 ---
-Label(frame_matriz_direita, text="H1:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#00f0ff").grid(row=6, column=0, padx=2, pady=3, sticky="w")
-entry_http_seg1 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#343746", fg="#00f0ff", bd=0, justify="center")
+Label(frame_matriz_direita, text="H1:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=6, column=0, padx=2, pady=3, sticky="w")
+entry_http_seg1 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#141b28", fg="#3fd6ea", bd=0, justify="center")
 entry_http_seg1.grid(row=6, column=1, padx=2, ipady=2, sticky="ew")
 entry_http_seg1.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_painel())
 
@@ -2773,17 +2773,17 @@ seletor_http_met1.set("GET")
 seletor_http_met1.grid(row=6, column=2, padx=2, sticky="ew")
 seletor_http_met1.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_http_via_painel())
 
-entry_http_url1 = Entry(frame_matriz_direita, font=("Arial", calcular_fonte(9)), bg="#343746", fg="#ffffff", bd=0, width=largura_url_char)
+entry_http_url1 = Entry(frame_matriz_direita, font=("Arial", calcular_fonte(9)), bg="#141b28", fg="#ffffff", bd=0, width=largura_url_char)
 entry_http_url1.grid(row=6, column=3, padx=2, ipady=2, sticky="ew")
 entry_http_url1.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_painel())
 
-lbl_http_feedback1 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#343746", fg="#62657a", width=10)
+lbl_http_feedback1 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_http_feedback1.grid(row=6, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#5a5d7a", fg="#f8f8f2", bd=0, command=testar_automacao_h1).grid(row=6, column=5, padx=2, sticky="nsew")
+Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=testar_automacao_h1).grid(row=6, column=5, padx=2, sticky="nsew")
 
 # --- LINHA H2 ---
-Label(frame_matriz_direita, text="H2:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#00f0ff").grid(row=7, column=0, padx=2, pady=3, sticky="w")
-entry_http_seg2 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#343746", fg="#00f0ff", bd=0, justify="center")
+Label(frame_matriz_direita, text="H2:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=7, column=0, padx=2, pady=3, sticky="w")
+entry_http_seg2 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#141b28", fg="#3fd6ea", bd=0, justify="center")
 entry_http_seg2.grid(row=7, column=1, padx=2, ipady=2, sticky="ew")
 entry_http_seg2.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_painel())
 
@@ -2792,16 +2792,16 @@ seletor_http_met2.set("GET")
 seletor_http_met2.grid(row=7, column=2, padx=2, sticky="ew")
 seletor_http_met2.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_http_via_painel())
 
-entry_http_url2 = Entry(frame_matriz_direita, font=("Arial", calcular_fonte(9)), bg="#343746", fg="#ffffff", bd=0, width=largura_url_char)
+entry_http_url2 = Entry(frame_matriz_direita, font=("Arial", calcular_fonte(9)), bg="#141b28", fg="#ffffff", bd=0, width=largura_url_char)
 entry_http_url2.grid(row=7, column=3, padx=2, ipady=2, sticky="ew")
 entry_http_url2.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_painel())
 
-lbl_http_feedback2 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#343746", fg="#62657a", width=10)
+lbl_http_feedback2 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_http_feedback2.grid(row=7, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#5a5d7a", fg="#f8f8f2", bd=0, command=testar_automacao_h2).grid(row=7, column=5, padx=2, sticky="nsew")
+Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=testar_automacao_h2).grid(row=7, column=5, padx=2, sticky="nsew")
 # --- LINHA H3 (CORRIGIDA COM BG DRACULA OPACO) ---
-Label(frame_matriz_direita, text="H3:", font=("Arial", calcular_fonte(8), "bold"), bg="#282a36", fg="#00f0ff").grid(row=8, column=0, padx=2, pady=3, sticky="w")
-entry_http_seg3 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#343746", fg="#00f0ff", bd=0, justify="center")
+Label(frame_matriz_direita, text="H3:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=8, column=0, padx=2, pady=3, sticky="w")
+entry_http_seg3 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#141b28", fg="#3fd6ea", bd=0, justify="center")
 entry_http_seg3.grid(row=8, column=1, padx=2, ipady=2, sticky="ew")
 entry_http_seg3.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_painel())
 
@@ -2810,80 +2810,80 @@ seletor_http_met3.set("GET")
 seletor_http_met3.grid(row=8, column=2, padx=2, sticky="ew")
 seletor_http_met3.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_http_via_painel())
 
-entry_http_url3 = Entry(frame_matriz_direita, font=("Arial", calcular_fonte(9)), bg="#343746", fg="#ffffff", bd=0, width=largura_url_char)
+entry_http_url3 = Entry(frame_matriz_direita, font=("Arial", calcular_fonte(9)), bg="#141b28", fg="#ffffff", bd=0, width=largura_url_char)
 entry_http_url3.grid(row=8, column=3, padx=2, ipady=2, sticky="ew")
 entry_http_url3.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_painel())
 
-lbl_http_feedback3 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#343746", fg="#62657a", width=10)
+lbl_http_feedback3 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_http_feedback3.grid(row=8, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#5a5d7a", fg="#f8f8f2", bd=0, command=testar_automacao_h3).grid(row=8, column=5, padx=2, sticky="nsew")
+Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=testar_automacao_h3).grid(row=8, column=5, padx=2, sticky="nsew")
 
-# Divisória de Estúdio (Pintada em bg="#282a36")
-Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#282a36", fg="#44475a").grid(row=9, column=0, columnspan=6, pady=4)
+# Divisória de Estúdio (Pintada em bg="#0b0f1a")
+Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#0b0f1a", fg="#1f2937").grid(row=9, column=0, columnspan=6, pady=4)
 
 # ─────────────────────────────────────────────────────────────────────────
 # SECTOR 3: 🎛️ PAINEL DE INTERRUPTORES (TOGGLES) - BG OPACO PROTEGIDO
 # ─────────────────────────────────────────────────────────────────────────
-frame_botoes_toggle_linha = Frame(frame_matriz_direita, bg="#282a36")
+frame_botoes_toggle_linha = Frame(frame_matriz_direita, bg="#0b0f1a")
 frame_botoes_toggle_linha.grid(row=10, column=0, columnspan=6, sticky="ew", pady=(2, 2))
 frame_botoes_toggle_linha.columnconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
 
-btn_modo_zero = Button(frame_botoes_toggle_linha, text="MODO NEGATIVO", bg="#8b5cf6", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_modo_zero)
+btn_modo_zero = Button(frame_botoes_toggle_linha, text="MODO NEGATIVO", bg="#0891b2", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_modo_zero)
 btn_modo_zero.grid(row=0, column=0, padx=1, pady=2, sticky="nsew", ipady=2)
 
-btn_alternar_web = Button(frame_botoes_toggle_linha, text="MODO RELÓGIO", bg="#00f0ff", fg="#000000", font=fonte_botoes_trig, bd=0, command=alternar_modo_visualizacao)
+btn_alternar_web = Button(frame_botoes_toggle_linha, text="MODO RELÓGIO", bg="#0e7490", fg="#dfe9ec", font=fonte_botoes_trig, bd=0, command=alternar_modo_visualizacao)
 btn_alternar_web.grid(row=0, column=1, padx=1, pady=2, sticky="nsew", ipady=2)
 
-btn_ecran_on = Button(frame_botoes_toggle_linha, text="ECRÃ: LIGAR", bg="#22c55e", fg="white", font=fonte_botoes_trig, bd=0, command=generar_janela_nativa_directx)
+btn_ecran_on = Button(frame_botoes_toggle_linha, text="ECRÃ: LIGAR", bg="#0d9488", fg="white", font=fonte_botoes_trig, bd=0, command=generar_janela_nativa_directx)
 btn_ecran_on.grid(row=0, column=2, padx=1, pady=2, sticky="nsew", ipady=2)
 
-btn_ecran_off = Button(frame_botoes_toggle_linha, text="ECRÃ: DESLIGAR", bg="#ff5555", fg="white", font=fonte_botoes_trig, bd=0, command=fechar_ecran_nativo_botao)
+btn_ecran_off = Button(frame_botoes_toggle_linha, text="ECRÃ: DESLIGAR", bg="#b91c1c", fg="white", font=fonte_botoes_trig, bd=0, command=fechar_ecran_nativo_botao)
 btn_ecran_off.grid(row=0, column=3, padx=1, pady=2, sticky="nsew", ipady=2)
 
-btn_toggle_piscar = Button(frame_botoes_toggle_linha, text="💥 PISCAR", bg="#22c55e", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_permissao_piscar)
+btn_toggle_piscar = Button(frame_botoes_toggle_linha, text="💥 PISCAR", bg="#0d9488", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_permissao_piscar)
 btn_toggle_piscar.grid(row=0, column=4, padx=1, pady=2, sticky="nsew", ipady=2)
 
-btn_mute_som = Button(frame_botoes_toggle_linha, text="🔊 SOM: ON", bg="#22c55e", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_mute_som)
+btn_mute_som = Button(frame_botoes_toggle_linha, text="🔊 SOM: ON", bg="#0d9488", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_mute_som)
 btn_mute_som.grid(row=0, column=5, padx=1, pady=2, sticky="nsew", ipady=2)
 
-btn_parar_som_emerg = Button(frame_botoes_toggle_linha, text="🛑 PARAR\n SOM", bg="#991b1b", fg="white", font=fonte_botoes_trig, bd=0, command=parar_audio_nativo_sistema)
+btn_parar_som_emerg = Button(frame_botoes_toggle_linha, text="🛑 PARAR\n SOM", bg="#7f1d1d", fg="white", font=fonte_botoes_trig, bd=0, command=parar_audio_nativo_sistema)
 btn_parar_som_emerg.grid(row=0, column=6, padx=1, pady=2, sticky="nsew", ipady=2)
 
-# 💥 CORREÇÃO BROADCAST: Fundo da linha divisória final cravado em #282a36 para extinguir a transparência!
-Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#282a36", fg="#44475a").grid(row=11, column=0, columnspan=6, pady=4)
+# 💥 CORREÇÃO BROADCAST: Fundo da linha divisória final cravado em #0b0f1a para extinguir a transparência!
+Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#0b0f1a", fg="#1f2937").grid(row=11, column=0, columnspan=6, pady=4)
 
 
 
 # =========================================================================
 # 3. CINCO GRANDES BOTÕES DE ACÇÃO CORE DO FUNDO (DESLOCADOS PARA A ESQUERDA)
 # =========================================================================
-frame_botoes_acao = Frame(container, bg="#282a36")
+frame_botoes_acao = Frame(container, bg="#0b0f1a")
 frame_botoes_acao.pack(fill="x", side="top", expand=True, pady=(10, 5), padx=(0, 25 if SISTEMA_MAC else 0))
 frame_botoes_acao.columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
 
 pading_botao_core = 8 if SISTEMA_MAC else calcular_pading(8)
 
-Button(frame_botoes_acao, text="INICIAR", bg="#22c55e", fg="white",
+Button(frame_botoes_acao, text="INICIAR", bg="#0d9488", fg="white",
        font=("Arial", calcular_fonte(11), "bold"), bd=0, command=iniciar_timer
 ).grid(row=0, column=0, padx=6, ipady=pading_botao_core, sticky="ew")
 
-Button(frame_botoes_acao, text="PAUSAR", bg="#eab308", fg="white",
+Button(frame_botoes_acao, text="PAUSAR", bg="#b45309", fg="white",
        font=("Arial", calcular_fonte(11), "bold"), bd=0, command=pausar_timer
 ).grid(row=0, column=1, padx=6, ipady=pading_botao_core, sticky="ew")
 
-Button(frame_botoes_acao, text="ATUALIZAR", bg="#a855f7", fg="white",
+Button(frame_botoes_acao, text="ATUALIZAR", bg="#0891b2", fg="white",
        font=("Arial", calcular_fonte(11), "bold"), bd=0, command=executar_override_tempo
 ).grid(row=0, column=2, padx=6, ipady=pading_botao_core, sticky="ew")
 
-Button(frame_botoes_acao, text="STOP", bg="#ff5555", fg="white",
+Button(frame_botoes_acao, text="STOP", bg="#b91c1c", fg="white",
        font=("Arial", calcular_fonte(11), "bold"), bd=0, command=parar_timer
 ).grid(row=0, column=3, padx=6, ipady=pading_botao_core, sticky="ew")
 
-Button(frame_botoes_acao, text="REINICIAR", bg="#00a3ff", fg="white",
+Button(frame_botoes_acao, text="REINICIAR", bg="#0ea5c4", fg="white",
        font=("Arial", calcular_fonte(11), "bold"), bd=0, command=reiniciar_timer
 ).grid(row=0, column=4, padx=6, ipady=pading_botao_core, sticky="ew")
 
-Button(frame_botoes_acao, text="📋 CUES", bg="#8b5cf6", fg="white",
+Button(frame_botoes_acao, text="📋 CUES", bg="#0891b2", fg="white",
        font=("Arial", calcular_fonte(11), "bold"), bd=0, command=abrir_janela_cues
 ).grid(row=0, column=5, padx=6, ipady=pading_botao_core, sticky="ew")
 
@@ -2901,8 +2901,8 @@ try:
                 caminho_ico = os.path.join(caminho_base, "app.ico")
                 if os.path.exists(caminho_ico):
                     imagem = Image.open(caminho_ico)
-                    menu = pystray.Menu(pystray.MenuItem('Fechar AVKtimer', fechar_aplicacao_seguro))
-                    icon = pystray.Icon("AVKtimer", imagem, "AVKtimer Server", menu)
+                    menu = pystray.Menu(pystray.MenuItem('Fechar Cue Timer', fechar_aplicacao_seguro))
+                    icon = pystray.Icon("CueTimer", imagem, "Cue Timer Server", menu)
                     globals()['icone_tray_criado'] = True
                     threading.Thread(target=icon.run, daemon=True).start()
             except Exception:
@@ -2914,7 +2914,7 @@ except Exception:
     pass
 
 # --- ACIONAMENTO FINAL EXCLUSIVO DAS THREADS ASSÍNCRONAS (NÃO REPETIR) ---
-print("\n[AVKtimer Core] A disparar motores assíncronos de estúdio...")
+print("\n[Cue Timer Core] A disparar motores assíncronos de estúdio...")
 
 carregar_lista_cues()
 
@@ -2924,7 +2924,7 @@ threading.Thread(target=loop_atualizacao_ecran_nativo, daemon=True).start()
 threading.Thread(target=loop_deteccao_slides, daemon=True).start()
 # 💥 Cloudflare removida de forma limpa aqui para evitar falhas
 
-print("[AVKtimer Core] Motores ativos. A escutar Companion e Browser na porta 4545.\n")
+print("[Cue Timer Core] Motores ativos. A escutar Companion e Browser na porta 4545.\n")
 # --- 🍎 CRIAÇÃO DA BARRA DE MENUS NATIVA DO MACOS 🍎 ---
 if SISTEMA_MAC:
     from tkinter import Menu
@@ -2967,7 +2967,7 @@ if not SISTEMA_MAC:
 
     # 4. Remove as bordas pretas mantendo o tamanho gigante maximizado e o fundo Dracula opaco
     janela_principal.overrideredirect(True)
-    janela_principal.wm_attributes("-transparentcolor", "#1a1a24")
+    janela_principal.wm_attributes("-transparentcolor", "#080b12")
     janela_principal.update()
     print("[Régie UI] Janela disparada em Fullscreen Maximizado. Elasticidade ativa a 100%.")
 else:

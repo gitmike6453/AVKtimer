@@ -5,11 +5,11 @@
 
 [Setup]
 AppId={{AVKTIMER-VIGIA-SLIDES-WIN}}
-AppName=AVKtimer Vigia de Slides
+AppName=Cue Timer Vigia de Slides
 AppPublisher=AVK Studio
 AppVersion=1.0.1
-DefaultDirName={autopf}\AVKtimer Vigia de Slides
-DefaultGroupName=AVKtimer Vigia de Slides
+DefaultDirName={autopf}\Cue Timer Vigia de Slides
+DefaultGroupName=Cue Timer Vigia de Slides
 AllowNoIcons=yes
 Compression=lzma
 SolidCompression=yes
@@ -19,7 +19,7 @@ VersionInfoVersion=1.0.1.0
 VersionInfoTextVersion=1.0.1
 
 OutputDir={#RepoRoot}Output
-OutputBaseFilename=AVKtimer_VigiaSlides_v1.0.1_Setup
+OutputBaseFilename=CueTimer_VigiaSlides_v1.0.1_Setup
 SetupIconFile={#RepoRoot}assets\app.ico
 
 [Languages]
@@ -33,8 +33,8 @@ Source: "{#RepoRoot}dist\VigiaSlides.exe"; DestDir: "{app}"; Flags: ignoreversio
 Source: "{#RepoRoot}assets\app.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\AVKtimer Vigia de Slides"; Filename: "{app}\VigiaSlides.exe"; IconFilename: "{app}\app.ico"
-Name: "{autodesktop}\AVKtimer Vigia de Slides"; Filename: "{app}\VigiaSlides.exe"; Tasks: desktopicon; IconFilename: "{app}\app.ico"
+Name: "{group}\Cue Timer Vigia de Slides"; Filename: "{app}\VigiaSlides.exe"; IconFilename: "{app}\app.ico"
+Name: "{autodesktop}\Cue Timer Vigia de Slides"; Filename: "{app}\VigiaSlides.exe"; Tasks: desktopicon; IconFilename: "{app}\app.ico"
 
 [Run]
-Filename: "{app}\VigiaSlides.exe"; Description: "{cm:LaunchProgram,AVKtimer Vigia de Slides}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\VigiaSlides.exe"; Description: "{cm:LaunchProgram,Cue Timer Vigia de Slides}"; Flags: nowait postinstall skipifsilent

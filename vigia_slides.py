@@ -95,10 +95,10 @@ def loop_vigia():
                     try:
                         requests.get(f"http://{ip}:4545/api/cue/slide", params={"numero": slide_atual}, timeout=2)
                         root.after(0, lambda s=slide_atual: lbl_status.config(
-                            text=f"Enviado à régie: slide {s}", fg="#50fa7b"))
+                            text=f"Enviado à régie: slide {s}", fg="#34d399"))
                     except Exception:
                         root.after(0, lambda: lbl_status.config(
-                            text=f"Falha a contactar a régie em {ip}:4545...", fg="#ff5555"))
+                            text=f"Falha a contactar a régie em {ip}:4545...", fg="#ef4444"))
                 elif slide_atual is None and ultimo_slide_enviado is not None:
                     ultimo_slide_enviado = None
                     root.after(0, lambda: lbl_status.config(text="Sem apresentação ativa...", fg="#eab308"))
@@ -116,22 +116,22 @@ def toggle_vigia():
         ip = entry_ip.get().strip()
         if not ip:
             vigia_ativo = False
-            lbl_status.config(text="Indica primeiro o IP da régie.", fg="#ff5555")
+            lbl_status.config(text="Indica primeiro o IP da régie.", fg="#ef4444")
             return
         gravar_config(ip)
-        btn_toggle.config(text="⏸ PARAR VIGIA", bg="#ff5555")
+        btn_toggle.config(text="⏸ PARAR VIGIA", bg="#b91c1c")
         entry_ip.config(state="disabled")
         nome_app = "Keynote" if SISTEMA_MAC else "PowerPoint"
         lbl_status.config(text=f"A vigiar o {nome_app}...", fg="#eab308")
     else:
-        btn_toggle.config(text="▶ LIGAR VIGIA", bg="#22c55e")
+        btn_toggle.config(text="▶ LIGAR VIGIA", bg="#0d9488")
         entry_ip.config(state="normal")
-        lbl_status.config(text="Parado.", fg="#62657a")
+        lbl_status.config(text="Parado.", fg="#7d97a3")
 
 
 root = Tk()
-root.title("AVKtimer — Vigia de Slides v1.0.1")
-root.configure(bg="#282a36")
+root.title("Cue Timer — Vigia de Slides v1.0.1")
+root.configure(bg="#0b0f1a")
 root.geometry("420x260")
 root.resizable(False, False)
 
@@ -141,24 +141,24 @@ try:
 except Exception:
     pass
 
-Label(root, text="AVKtimer — Vigia de Slides", font=("Arial", 15, "bold"),
-      bg="#282a36", fg="#f8f8f2").pack(pady=(18, 4))
+Label(root, text="Cue Timer — Vigia de Slides", font=("Arial", 15, "bold"),
+      bg="#0b0f1a", fg="#dfe9ec").pack(pady=(18, 4))
 Label(root, text="Corre no computador de quem apresenta e avisa\na régie sempre que o slide muda.",
-      font=("Arial", 9), bg="#282a36", fg="#62657a", justify="center").pack(pady=(0, 16))
+      font=("Arial", 9), bg="#0b0f1a", fg="#7d97a3", justify="center").pack(pady=(0, 16))
 
-frame_ip = Frame(root, bg="#282a36")
+frame_ip = Frame(root, bg="#0b0f1a")
 frame_ip.pack(pady=(0, 10))
-Label(frame_ip, text="IP da Régie (AVKtimer):", font=("Arial", 10, "bold"),
-      bg="#282a36", fg="#f8f8f2").pack(anchor="w")
+Label(frame_ip, text="IP da Régie (Cue Timer):", font=("Arial", 10, "bold"),
+      bg="#0b0f1a", fg="#dfe9ec").pack(anchor="w")
 entry_ip = Entry(frame_ip, font=("Arial", 12), width=22, justify="center")
 entry_ip.insert(0, carregar_config())
 entry_ip.pack(pady=(4, 0))
 
-btn_toggle = Button(root, text="▶ LIGAR VIGIA", bg="#22c55e", fg="white",
+btn_toggle = Button(root, text="▶ LIGAR VIGIA", bg="#0d9488", fg="white",
                      font=("Arial", 12, "bold"), bd=0, command=toggle_vigia)
 btn_toggle.pack(fill="x", padx=30, pady=(6, 12), ipady=8)
 
-lbl_status = Label(root, text="Parado.", font=("Arial", 9), bg="#282a36", fg="#62657a")
+lbl_status = Label(root, text="Parado.", font=("Arial", 9), bg="#0b0f1a", fg="#7d97a3")
 lbl_status.pack()
 
 threading.Thread(target=loop_vigia, daemon=True).start()

@@ -141,6 +141,33 @@ publica os dois como Release no GitHub.
   `macos-15` ser retirado (previsto outono de 2027); nessa altura é preciso
   mudar para build universal2 ou publicar dois `.dmg` separados.
 
+## v2.0 — Rebrand para "Cue Timer" + paleta visual mais "tech"
+
+- Nome visível trocado de "AVKtimer" para "Cue Timer" em todo o lado: título
+  da janela, ecrã de palco, painel de Cues, bandeja do sistema, site
+  things-on (nav, home, página própria) e nomes dos instaladores
+  (`CueTimer_Setup_v2.0.exe`, `CueTimer_v2.0.dmg`,
+  `CueTimer_VigiaSlides_v1.0.1_Setup.exe`). **Não alterado de propósito**: o
+  repositório GitHub (continua `gitmike6453/AVKtimer`) e a pasta de dados do
+  utilizador (`%APPDATA%\AVKtimer` / `~/Library/Application Support/AVKtimer`)
+  — para não perder cue lists e configurações já gravadas por quem já usa a
+  app. O `AppId` do instalador Windows também foi mantido igual, para o
+  Windows tratar isto como uma atualização e não uma segunda instalação.
+- Paleta de cores substituída: o fundo/paineis Dracula (roxo-acinzentado
+  `#282a36` e família) passou a uma base azul-preto mais "tech"
+  (`#0b0f1a`/`#141b28`/`#080b12`), e o cyan de destaque (`#00f0ff`) alinhado
+  ao cyan de marca do site (`#3fd6ea`), a mesma referência usada no ícone do
+  Cue Timer em things-on.mike-app.com.
+- Os botões de ação (INICIAR/PAUSAR/STOP/etc, toggles ECRÃ/SOM/PISCAR,
+  MODO RELÓGIO) tinham preenchimentos em cores primárias muito saturadas
+  (verde/vermelho/âmbar/cyan "vivos"), o que lia como infantil/"caixa de
+  lápis de cor" -- aprofundados para tons mais escuros e dessaturados
+  (`#0d9488` verde-petróleo, `#b91c1c` vermelho profundo, `#b45309` âmbar
+  profundo, `#0e7490`/`#0891b2` cyan profundo), mantendo o texto/legendas em
+  cores mais claras e legíveis para não perder contraste.
+- `vigia_slides.py` recebeu a mesma paleta e o mesmo rebrand de nome, para
+  as duas apps continuarem visualmente consistentes.
+
 ## Por verificar/decidir (não alterado)
 
 - `/api/som/set_webhooks` só permite definir remotamente o webhook H1 (H2/H3 só
