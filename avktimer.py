@@ -87,7 +87,7 @@ if not SISTEMA_MAC:
         pass
 
 root = Tk()
-root.title("AVKtimer v1.8")
+root.title("AVKtimer v1.9")
 root.withdraw()
 
 LARGURA_ECRA = root.winfo_screenwidth()
@@ -555,6 +555,28 @@ def api_cue_goto():
 def api_cue_list():
     """Devolve a lista de cues atual e qual está ativa, para consumo externo (Companion)."""
     return jsonify({"cues": lista_cues, "indice_atual": indice_cue_atual})
+
+
+@app.route('/api/cue/slide')
+def api_cue_slide():
+    """Recebe o número de slide detetado por um Vigia de Slides externo (noutra máquina, ex: o
+    portátil de quem apresenta) e aplica a cue correspondente. Só atua se a Deteção Automática
+    estiver ligada no painel de Cues -- assim o mesmo interruptor governa a deteção local e a remota."""
+    global ultimo_slide_detectado
+    if not deteccao_automatica_ativa:
+        return jsonify({"status": "ignorado", "motivo": "deteccao automatica desligada"})
+    try:
+        numero = int(request.args.get('numero', -1))
+        if numero < 0:
+            return jsonify({"status": "erro", "motivo": "numero invalido"})
+        ultimo_slide_detectado = numero
+        encontrou = ir_para_cue_por_slide(numero)
+        if 'lbl_deteccao_status' in globals() and lbl_deteccao_status:
+            texto = f"Slide atual (remoto): {numero}" + ("" if encontrou else " (sem cue associada)")
+            root.after(0, lambda t=texto: lbl_deteccao_status.config(text=t, fg="#50fa7b"))
+        return jsonify({"status": "sucesso", "slide": numero, "cue_encontrada": encontrou})
+    except Exception as e:
+        return jsonify({"status": "erro", "motivo": str(e)})
 
 
 @app.route('/api/cue/deteccao')

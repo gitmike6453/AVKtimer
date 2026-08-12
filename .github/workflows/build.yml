@@ -28,6 +28,12 @@ jobs:
       - name: Build installer
         run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" packaging\windows\avk.iss'
 
+      - name: Build Vigia de Slides onefile executable
+        run: pyinstaller packaging/windows/VigiaSlides.spec
+
+      - name: Build Vigia de Slides installer
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" packaging\windows\vigia.iss'
+
       - uses: actions/upload-artifact@v4
         with:
           name: AVKtimer-windows-installer
@@ -44,6 +50,9 @@ jobs:
 
       - name: Build .app and .dmg
         run: bash packaging/macos/build_mac.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Build Vigia de Slides .app and .dmg
+        run: bash packaging/macos/build_mac_vigia.sh "1.0"
 
       - uses: actions/upload-artifact@v4
         with:

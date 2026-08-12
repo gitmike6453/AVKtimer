@@ -100,6 +100,22 @@ publica os dois como Release no GitHub.
   como `v1.7` porque o workflow nunca lhe passava a versão da tag — o `.dmg` fica
   agora corretamente nomeado a partir da tag do release.
 
+## v1.9 — Vigia de Slides (deteção em máquina separada)
+
+- A deteção automática de slides (COM/PowerPoint e AppleScript/Keynote) só via o
+  slide se corresse na mesma máquina que o AVKtimer. Como em régie normal o
+  portátil de quem apresenta é outra máquina, foi criado um segundo executável
+  leve, **AVKtimer Vigia de Slides** (`vigia_slides.py`), para correr nesse
+  portátil: deteta o slide localmente e avisa a régie por HTTP.
+- Nova rota `/api/cue/slide?numero=N` no AVKtimer principal, que recebe o aviso do
+  Vigia e aplica a cue correspondente — só atua se a Deteção Automática estiver
+  ligada no painel de Cues, o mesmo interruptor que já governava a deteção local.
+- O Vigia é uma janela simples: um campo para o IP da régie (gravado entre
+  sessões em `vigia_slides_config.json`, na mesma pasta de dados do AVKtimer) e
+  um botão LIGAR/PARAR. Empacotado com instalador próprio para Windows e macOS
+  (`packaging/windows/vigia.iss`, `packaging/macos/build_mac_vigia.sh`),
+  compilado e publicado pelo mesmo workflow de CI.
+
 ## Por verificar/decidir (não alterado)
 
 - `/api/som/set_webhooks` só permite definir remotamente o webhook H1 (H2/H3 só
