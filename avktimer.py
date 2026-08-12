@@ -11,6 +11,7 @@ from tkinter import Tk, Label, Entry, Button, StringVar, messagebox, Frame, Canv
 from tkinter.ttk import Combobox
 from tkinter import filedialog
 from flask import Flask, render_template, jsonify, request
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageTk
 
 # 💥 PRIMEIRO: Define a variável global do sistema para o Python a memorizar logo no boot
 SISTEMA_MAC = (sys.platform == "darwin")
@@ -87,7 +88,7 @@ if not SISTEMA_MAC:
         pass
 
 root = Tk()
-root.title("Cue Timer v2.1")
+root.title("Cue Timer v2.2")
 root.withdraw()
 
 LARGURA_ECRA = root.winfo_screenwidth()
@@ -1046,11 +1047,11 @@ def alternar_modo_visualizacao():
     if modo_visualizacao == "timer":
         modo_visualizacao = "relogio"
         if 'btn_alternar_web' in globals() and btn_alternar_web is not None:
-            btn_alternar_web.config(text="MUDAR PARA: MODO TIMER", bg="#0ea5c4", fg="#000000", font=fonte_toggle)
+            btn_alternar_web.set_estado(ativo=True, texto="MUDAR PARA: MODO TIMER")
     else:
         modo_visualizacao = "timer"
         if 'btn_alternar_web' in globals() and btn_alternar_web is not None:
-            btn_alternar_web.config(text="MUDAR PARA: MODO RELÓGIO", bg="#0e7490", fg="#dfe9ec", font=fonte_toggle)
+            btn_alternar_web.set_estado(ativo=False, texto="MUDAR PARA: MODO RELÓGIO")
 
 
 def generar_janela_nativa_directx():
@@ -1139,8 +1140,8 @@ def toggle_modo_zero():
     global modo_negativo, btn_modo_zero
     modo_negativo = not modo_negativo
     if 'btn_modo_zero' in globals() and btn_modo_zero is not None:
-        btn_modo_zero.config(text="MODO: CONTINUAR NEGATIVO" if modo_negativo else "MODO: PARAR NO ZERO",
-                             bg="#0891b2" if modo_negativo else "#334155")
+        btn_modo_zero.set_estado(ativo=modo_negativo,
+                                 texto="MODO: CONTINUAR NEGATIVO" if modo_negativo else "MODO: PARAR NO ZERO")
 
 
 def aplicar_alertas_customizados():
@@ -1668,7 +1669,7 @@ def atualizar_botao_deteccao_ui():
         if 'btn_toggle_deteccao' in globals() and btn_toggle_deteccao is not None and btn_toggle_deteccao.winfo_exists():
             btn_toggle_deteccao.set_estado(
                 ativo=deteccao_automatica_ativa,
-                texto="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA"
+                texto="DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "DETEÇÃO AUTOMÁTICA: DESLIGADA"
             )
     except Exception:
         pass
@@ -1834,8 +1835,8 @@ def abrir_janela_cues():
     entry_cue_nome = Entry(frame_form, font=fonte_entry)
     entry_cue_nome.grid(row=1, column=2, padx=(0, 8), pady=(2, 8), sticky="ew")
 
-    Button(frame_form, text="+ ADICIONAR", bg="#0d9488", fg="white", font=fonte_lbl, bd=0,
-           command=adicionar_cue).grid(row=1, column=3, ipady=6, sticky="ew")
+    BotaoMetal(frame_form, text="+ ADICIONAR", fonte=fonte_lbl, raio=8, padding_x=14, bg_pai="#0b0f1a",
+              command=adicionar_cue).grid(row=1, column=3, sticky="")
 
     listbox_cues = Listbox(janela_cues, font=("Consolas", calcular_fonte(10)), bg="#0d1220", fg="#dfe9ec",
                             selectbackground="#0ea5c4", activestyle="none", height=14, bd=0, highlightthickness=0)
@@ -1844,25 +1845,26 @@ def abrir_janela_cues():
     frame_gestao = Frame(janela_cues, bg="#0b0f1a")
     frame_gestao.pack(fill="x", padx=14, pady=(0, 6))
     frame_gestao.columnconfigure((0, 1, 2), weight=1)
-    Button(frame_gestao, text="▲ SUBIR", bg="#374151", fg="white", font=fonte_lbl, bd=0,
-           command=lambda: mover_cue(-1)).grid(row=0, column=0, padx=3, ipady=4, sticky="ew")
-    Button(frame_gestao, text="▼ DESCER", bg="#374151", fg="white", font=fonte_lbl, bd=0,
-           command=lambda: mover_cue(1)).grid(row=0, column=1, padx=3, ipady=4, sticky="ew")
-    Button(frame_gestao, text="🗑 REMOVER", bg="#b91c1c", fg="white", font=fonte_lbl, bd=0,
-           command=remover_cue_selecionada).grid(row=0, column=2, padx=3, ipady=4, sticky="ew")
+    BotaoMetal(frame_gestao, text="SUBIR", ativo=False, fonte=fonte_lbl, raio=8, padding_x=12, bg_pai="#0b0f1a",
+              command=lambda: mover_cue(-1)).grid(row=0, column=0, padx=3, sticky="")
+    BotaoMetal(frame_gestao, text="DESCER", ativo=False, fonte=fonte_lbl, raio=8, padding_x=12, bg_pai="#0b0f1a",
+              command=lambda: mover_cue(1)).grid(row=0, column=1, padx=3, sticky="")
+    BotaoMetal(frame_gestao, text="REMOVER", ativo=False, fonte=fonte_lbl, raio=8, padding_x=12, bg_pai="#0b0f1a",
+              command=remover_cue_selecionada).grid(row=0, column=2, padx=3, sticky="")
 
-    Button(janela_cues, text="▶ NEXT — aplica e arranca a cue seguinte", bg="#0ea5c4", fg="white",
-           font=("Arial", calcular_fonte(12), "bold"), bd=0, command=avancar_cue_next
-           ).pack(fill="x", padx=14, pady=(6, 10), ipady=10)
+    BotaoMetal(janela_cues, text="NEXT — aplica e arranca a cue seguinte",
+              fonte=("Arial", calcular_fonte(12), "bold"), raio=12, padding_x=30, bg_pai="#0b0f1a",
+              command=avancar_cue_next
+              ).pack(padx=14, pady=(6, 10))
 
     Label(janela_cues, text="―" * 60, bg="#0b0f1a", fg="#1f2937").pack()
 
     nome_app_deteccao = "Keynote" if SISTEMA_MAC else "PowerPoint"
     btn_toggle_deteccao = BotaoMetal(
         janela_cues,
-        text="🟢 DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "⚪ DETEÇÃO AUTOMÁTICA: DESLIGADA",
+        text="DETEÇÃO AUTOMÁTICA: LIGADA" if deteccao_automatica_ativa else "DETEÇÃO AUTOMÁTICA: DESLIGADA",
         ativo=deteccao_automatica_ativa, raio=10, fonte=fonte_lbl,
-        height=calcular_fonte(30), bg_pai="#0b0f1a", command=toggle_deteccao_automatica
+        largura=380, bg_pai="#0b0f1a", command=toggle_deteccao_automatica
     )
     btn_toggle_deteccao.pack(fill="x", padx=14, pady=(10, 4))
 
@@ -1880,7 +1882,7 @@ def toggle_mute_som():
     som_ativado = not som_ativado
     if 'btn_mute_som' in globals() and btn_mute_som is not None:
         btn_mute_som.set_estado(ativo=som_ativado,
-                                texto="🔊 SOM: ON" if som_ativado else "🔇 SOM: MUTADO")
+                                texto="SOM: ON" if som_ativado else "SOM: MUTADO")
 
 
 def toggle_permissao_piscar():
@@ -1889,7 +1891,7 @@ def toggle_permissao_piscar():
     if 'btn_toggle_piscar' in globals() and btn_toggle_piscar is not None:
         btn_toggle_piscar.set_estado(
             ativo=permitir_piscar_pos_zero,
-            texto="💥 PISCAR: LIGADO" if permitir_piscar_pos_zero else "🛑 PISCAR: DESLIGADO"
+            texto="PISCAR: LIGADO" if permitir_piscar_pos_zero else "PISCAR: DESLIGADO"
         )
 
 
@@ -2191,13 +2193,40 @@ def criar_retangulo_arredondado(canvas_obj, x1, y1, x2, y2, raio, **kwargs):
     return canvas_obj.create_polygon(p, **kwargs, smooth=True)
 
 
-class BotaoMetal(Canvas):
-    """Botão desenhado à mão em Canvas: cantos arredondados + gradiente metálico
-    vertical (verde-cyan) + brilho quando ativo. Existe porque o tk.Button normal
-    só pinta cor sólida lisa -- sem gradiente, sem cantos redondos, sem brilho.
-    Reutiliza criar_retangulo_arredondado() para o contorno; a máscara dos 4
-    cantos é feita com arcos pintados na cor de fundo do painel-pai, porque o
-    Canvas não tem clip-path nativo."""
+_CACHE_FONTES_PIL = {}
+
+
+def _carregar_fonte_pil(tamanho, negrito=True):
+    """Carrega uma TTF real para o PIL desenhar texto liso (a fonte bitmap por
+    omissão do PIL fica sempre serrilhada, mesmo com supersampling). Tenta os
+    caminhos típicos do Windows e do Mac; se nenhum existir, cai no bitmap."""
+    chave = (tamanho, negrito)
+    if chave in _CACHE_FONTES_PIL:
+        return _CACHE_FONTES_PIL[chave]
+    candidatos = (
+        ["arialbd.ttf", "Arial Bold.ttf", "/System/Library/Fonts/Supplemental/Arial Bold.ttf"]
+        if negrito else
+        ["arial.ttf", "Arial.ttf", "/System/Library/Fonts/Supplemental/Arial.ttf"]
+    )
+    fonte = None
+    for caminho in candidatos:
+        try:
+            fonte = ImageFont.truetype(caminho, tamanho)
+            break
+        except Exception:
+            continue
+    if fonte is None:
+        fonte = ImageFont.load_default()
+    _CACHE_FONTES_PIL[chave] = fonte
+    return fonte
+
+
+class BotaoMetal(Label):
+    """Botão pré-renderizado com PIL: cantos arredondados lisos (supersampling
+    4x + downscale LANCZOS), gradiente metálico vertical verde-cyan e brilho
+    quando ativo. Existe porque o tk.Button normal só pinta cor sólida lisa, e
+    a primeira versão (desenhada à mão em Canvas, com máscara de arcos para os
+    cantos) ficava com serrilhado visível nos cantos -- o PIL evita isso."""
 
     GRAD_ATIVO = ("#1f9d89", "#0d4a41")
     GRAD_INATIVO = ("#142622", "#0a1614")
@@ -2205,62 +2234,100 @@ class BotaoMetal(Canvas):
     COR_BRILHO = "#7ffbe8"
     COR_TEXTO_ATIVO = "#04120f"
     COR_TEXTO_INATIVO = "#e3f7f2"
+    ESCALA = 4
 
     def __init__(self, parent, text, command=None, ativo=True, raio=12,
-                 fonte=("Arial", 11, "bold"), bg_pai=None, **kwargs):
+                 fonte=("Arial", 11, "bold"), bg_pai=None, largura=None, altura=None,
+                 padding_x=26, **kwargs):
         bg_pai = bg_pai or parent["bg"]
-        super().__init__(parent, highlightthickness=0, bg=bg_pai, cursor="hand2", **kwargs)
+        super().__init__(parent, bg=bg_pai, cursor="hand2", borderwidth=0, highlightthickness=0)
         self.command = command
         self.texto = text
         self.ativo = ativo
-        self.fonte = fonte
         self.raio = raio
         self.bg_pai = bg_pai
+        self.padding_x = padding_x
+        self._tamanho_fonte = fonte[2] if len(fonte) > 1 and isinstance(fonte[1], int) else 11
+        self._negrito = "bold" in fonte
+        self._fonte_pil = _carregar_fonte_pil(fonte[1] if len(fonte) > 1 else 11, self._negrito)
         self._pressionado = False
         self._em_hover = False
-        self.bind("<Configure>", lambda e: self._desenhar())
+        self._foto = None
+
+        fonte_medida = self._fonte_pil
+        bbox = ImageDraw.Draw(Image.new("RGB", (1, 1))).textbbox((0, 0), text, font=fonte_medida)
+        largura_texto = bbox[2] - bbox[0]
+        self.largura = largura or max(largura_texto + padding_x * 2, 60)
+        self.altura = altura or int((bbox[3] - bbox[1]) * 3.0)
+
+        self._redesenhar()
         self.bind("<Button-1>", self._ao_premir)
         self.bind("<ButtonRelease-1>", self._ao_soltar)
         self.bind("<Enter>", lambda e: self._hover(True))
         self.bind("<Leave>", lambda e: self._hover(False))
 
-    def _interpolar(self, cor_a, cor_b, t):
-        ra, ga, ba = self.winfo_rgb(cor_a)
-        rb, gb, bb = self.winfo_rgb(cor_b)
-        r = int(ra + (rb - ra) * t) >> 8
-        g = int(ga + (gb - ga) * t) >> 8
-        b = int(ba + (bb - ba) * t) >> 8
+    def _interpolar_hex(self, cor_a, cor_b, t):
+        ra, ga, ba = int(cor_a[1:3], 16), int(cor_a[3:5], 16), int(cor_a[5:7], 16)
+        rb, gb, bb = int(cor_b[1:3], 16), int(cor_b[3:5], 16), int(cor_b[5:7], 16)
+        r = int(ra + (rb - ra) * t)
+        g = int(ga + (gb - ga) * t)
+        b = int(ba + (bb - ba) * t)
         return f"#{r:02x}{g:02x}{b:02x}"
 
-    def _desenhar(self):
-        self.delete("all")
-        w, h = self.winfo_width(), self.winfo_height()
-        if w < 6 or h < 6:
-            return
+    def _renderizar_imagem(self, largura, altura):
+        e = self.ESCALA
+        W, H, R = largura * e, altura * e, self.raio * e
+
         topo, base = self.GRAD_ATIVO if self.ativo else self.GRAD_INATIVO
         if self._em_hover:
-            topo = self._interpolar(topo, "#ffffff", 0.12)
-        for i in range(h):
-            t = i / max(h - 1, 1)
-            self.create_line(0, i, w, i, fill=self._interpolar(topo, base, t))
+            topo = self._interpolar_hex(topo, "#ffffff", 0.12)
 
-        r = min(self.raio, w / 2, h / 2)
-        # máscara arredondada: pinta os 4 cantos com a cor do painel-pai por cima do gradiente
-        self.create_arc(-1, -1, 2*r+1, 2*r+1, start=90, extent=90, fill=self.bg_pai, outline=self.bg_pai)
-        self.create_arc(w-2*r-1, -1, w+1, 2*r+1, start=0, extent=90, fill=self.bg_pai, outline=self.bg_pai)
-        self.create_arc(-1, h-2*r-1, 2*r+1, h+1, start=180, extent=90, fill=self.bg_pai, outline=self.bg_pai)
-        self.create_arc(w-2*r-1, h-2*r-1, w+1, h+1, start=270, extent=90, fill=self.bg_pai, outline=self.bg_pai)
+        # Gradiente rápido: gera só uma coluna de 1px com a interpolação e estica-a
+        # na horizontal com NEAREST -- evita um loop Python por cada pixel (W×H).
+        coluna = Image.new("RGBA", (1, H), (0, 0, 0, 0))
+        px_coluna = coluna.load()
+        for y in range(H):
+            cor = self._interpolar_hex(topo, base, y / max(H - 1, 1))
+            px_coluna[0, y] = (int(cor[1:3], 16), int(cor[3:5], 16), int(cor[5:7], 16), 255)
+        img = coluna.resize((W, H), Image.NEAREST)
+
+        mascara = Image.new("L", (W, H), 0)
+        ImageDraw.Draw(mascara).rounded_rectangle([0, 0, W - 1, H - 1], radius=R, fill=255)
+        img.putalpha(mascara)
 
         cor_contorno = self.COR_BRILHO if self.ativo else self.COR_BORDA
-        criar_retangulo_arredondado(self, 1, 1, w-1, h-1, raio=r, fill="",
-                                    outline=cor_contorno, width=2 if self.ativo else 1)
+        largura_linha = max(1, round((1.4 if self.ativo else 1.0) * e))
+        contorno = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        meia = largura_linha / 2
+        ImageDraw.Draw(contorno).rounded_rectangle(
+            [meia, meia, W - 1 - meia, H - 1 - meia], radius=R,
+            outline=cor_contorno, width=largura_linha
+        )
+        if self.ativo:
+            brilho = contorno.filter(ImageFilter.GaussianBlur(radius=1.5 * e))
+            img = Image.alpha_composite(img, brilho)
+        img = Image.alpha_composite(img, contorno)
+
+        img = img.resize((largura, altura), Image.LANCZOS)
 
         cor_texto = self.COR_TEXTO_ATIVO if self.ativo else self.COR_TEXTO_INATIVO
-        self.create_text(w/2, h/2, text=self.texto, fill=cor_texto, font=self.fonte, justify="center")
+        desenho_final = ImageDraw.Draw(img)
+        bbox = desenho_final.textbbox((0, 0), self.texto, font=self._fonte_pil)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        desenho_final.text(((largura - tw) / 2 - bbox[0], (altura - th) / 2 - bbox[1]),
+                           self.texto, font=self._fonte_pil, fill=cor_texto)
+        return img
+
+    def _redesenhar(self):
+        fundo = Image.new("RGBA", (self.largura, self.altura), self.bg_pai)
+        botao = self._renderizar_imagem(self.largura, self.altura)
+        fundo = Image.alpha_composite(fundo.convert("RGBA"), botao)
+        self._foto = ImageTk.PhotoImage(fundo)
+        self.config(image=self._foto, width=self.largura, height=self.altura)
 
     def _hover(self, dentro):
         self._em_hover = dentro
-        self._desenhar()
+        self._redesenhar()
 
     def _ao_premir(self, event):
         self._pressionado = True
@@ -2272,11 +2339,14 @@ class BotaoMetal(Canvas):
             self.command()
 
     def set_estado(self, ativo=None, texto=None):
+        if texto is not None and texto != self.texto:
+            self.texto = texto
+            bbox = ImageDraw.Draw(Image.new("RGB", (1, 1))).textbbox((0, 0), texto, font=self._fonte_pil)
+            largura_texto = bbox[2] - bbox[0]
+            self.largura = max(self.largura, largura_texto + self.padding_x * 2)
         if ativo is not None:
             self.ativo = ativo
-        if texto is not None:
-            self.texto = texto
-        self._desenhar()
+        self._redesenhar()
 
 
 def redimensionar_fundo(event):
@@ -2311,13 +2381,13 @@ else:
 
 
 # Barra de Arraste Superior Customizada (Drag Bar)
-frame_drag = Frame(container, bg="#080b12", height=36)
+frame_drag = Frame(container, bg="#0d1420", height=36)
 frame_drag.pack(fill='x', pady=(0, 5))
 frame_drag.pack_propagate(False)
 
-frame_marca = Frame(frame_drag, bg="#080b12")
+frame_marca = Frame(frame_drag, bg="#0d1420")
 frame_marca.pack(side="left", padx=10)
-lbl_texto_marca = Label(frame_marca, text="Cue Timer", font=("Arial", 9, "bold"), bg="#080b12", fg="#7d97a3")
+lbl_texto_marca = Label(frame_marca, text="Cue Timer", font=("Arial", 9, "bold"), bg="#0d1420", fg="#7d97a3")
 lbl_texto_marca.pack(side="left")
 # =========================================================================
 # BOTÕES DA BARRA SUPERIOR - ADAPTADOS PARA MOLDURA WINDOWS / MAC NATIVA
@@ -2377,7 +2447,7 @@ if not SISTEMA_MAC:
         frame_drag,
         text="✕",
         font=("Arial", calcular_fonte(12), "bold"),
-        bg="#080b12",
+        bg="#0d1420",
         fg="#ef4444",
         bd=0,
         cursor="hand2",
@@ -2390,7 +2460,7 @@ if not SISTEMA_MAC:
         frame_drag,
         text="🗗",
         font=("Arial", calcular_fonte(11), "bold"),
-        bg="#080b12",
+        bg="#0d1420",
         fg="#34d399",
         bd=0,
         cursor="hand2",
@@ -2417,7 +2487,7 @@ if not SISTEMA_MAC:
         frame_drag,
         text="🗕",
         font=("Arial", calcular_fonte(11), "bold"),
-        bg="#080b12",
+        bg="#0d1420",
         fg="#fde68a",
         bd=0,
         cursor="hand2",
@@ -2451,9 +2521,9 @@ if not SISTEMA_MAC:
 
 else:
     btn_fullscreen = None
-    Label(frame_drag, text=" ", bg="#080b12", width=6).pack(side="left")
+    Label(frame_drag, text=" ", bg="#0d1420", width=6).pack(side="left")
 
-lbl_grip = Label(frame_drag, text="═══ ═══", font=("Arial", 10, "bold"), bg="#080b12", fg="#1f2937")
+lbl_grip = Label(frame_drag, text="═══ ═══", font=("Arial", 10, "bold"), bg="#0d1420", fg="#1f2937")
 lbl_grip.pack(side="right", padx=10, expand=True)
 
 def iniciar_arrasto(event):
@@ -2477,11 +2547,11 @@ lbl_texto_marca.bind("<Button-1>", iniciar_arrasto)
 lbl_texto_marca.bind("<B1-Motion>", mover_janela)
 
 # Barra de Status do Log de Rede do Flask
-frame_ips_topo = Frame(container, bg="#080b12", height=30)
+frame_ips_topo = Frame(container, bg="#0d1420", height=30)
 frame_ips_topo.pack(fill="x", pady=(0, 10))
 frame_ips_topo.pack_propagate(False)
 
-lbl_ips_rede = Label(frame_ips_topo, text="A aguardar arranque do servidor web...", font=("Arial", 10, "bold"), bg="#080b12", fg="#7d97a3")
+lbl_ips_rede = Label(frame_ips_topo, text="A aguardar arranque do servidor web...", font=("Arial", 10, "bold"), bg="#0d1420", fg="#7d97a3")
 lbl_ips_rede.pack(expand=True)
 
 # Contentor Principal que divide o corpo nas duas colunas adaptativas
@@ -2515,10 +2585,14 @@ Label(frame_fonte_seletor, text=" ", bg="#0b0f1a", width=1).pack(side="left")
 tamanho_botoes_txt = 8 if SISTEMA_MAC else 10
 largura_botoes_letra = 24 if SISTEMA_MAC else 3
 
-btn_diminuir_letra = Button(frame_fonte_seletor, text="A-", font=("Arial", tamanho_botoes_txt, "bold"), bg="#1f2937", fg="#ef4444", bd=0, width=largura_botoes_letra, command=lambda: alterar_tamanho_fonte_local("minus"))
+btn_diminuir_letra = BotaoMetal(frame_fonte_seletor, text="A-", fonte=("Arial", tamanho_botoes_txt, "bold"),
+                                ativo=False, raio=6, padding_x=10, bg_pai="#0b0f1a",
+                                command=lambda: alterar_tamanho_fonte_local("minus"))
 btn_diminuir_letra.pack(side="left", padx=1)
 
-btn_aumentar_letra = Button(frame_fonte_seletor, text="A+", font=("Arial", tamanho_botoes_txt, "bold"), bg="#1f2937", fg="#34d399", bd=0, width=largura_botoes_letra, command=lambda: alterar_tamanho_fonte_local("plus"))
+btn_aumentar_letra = BotaoMetal(frame_fonte_seletor, text="A+", fonte=("Arial", tamanho_botoes_txt, "bold"),
+                                ativo=False, raio=6, padding_x=10, bg_pai="#0b0f1a",
+                                command=lambda: alterar_tamanho_fonte_local("plus"))
 btn_aumentar_letra.pack(side="left", padx=1)
 
 # 3. Indicador de Leitura de Tamanho Atual (Ex: 150pt)
@@ -2546,10 +2620,10 @@ entry_horas.insert(0, "01")
 entry_horas.pack(side="left", padx=2, ipady=calcular_pading(5))
 entry_horas.bind("<KeyRelease>", lambda e: atualizar_tempo_por_inputs())
 
-Button(frame_hms_alinhado, text="+1H", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
-       command=lambda: alterar_horas(1), width=3, bd=0).pack(side="left", padx=1, ipady=calcular_pading(3))
-Button(frame_hms_alinhado, text="-1H", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
-       command=lambda: alterar_horas(-1), width=3, bd=0).pack(side="left", padx=(1, 5), ipady=calcular_pading(3))
+BotaoMetal(frame_hms_alinhado, text="+1H", fonte=("Arial", calcular_fonte(12), "bold"), ativo=False, raio=6,
+          padding_x=8, bg_pai="#0b0f1a", command=lambda: alterar_horas(1)).pack(side="left", padx=1)
+BotaoMetal(frame_hms_alinhado, text="-1H", fonte=("Arial", calcular_fonte(12), "bold"), ativo=False, raio=6,
+          padding_x=8, bg_pai="#0b0f1a", command=lambda: alterar_horas(-1)).pack(side="left", padx=(1, 5))
 
 Label(frame_hms_alinhado, text=":", font=("Arial", calcular_fonte(18), "bold"), bg="#0b0f1a", fg="#dfe9ec").pack(
     side="left", padx=2)
@@ -2561,10 +2635,10 @@ entry_minutos.insert(0, "00")
 entry_minutos.pack(side="left", padx=2, ipady=calcular_pading(5))
 entry_minutos.bind("<KeyRelease>", lambda e: atualizar_tempo_por_inputs())
 
-Button(frame_hms_alinhado, text="+1M", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
-       command=lambda: alterar_minutos(1), width=3, bd=0).pack(side="left", padx=1, ipady=calcular_pading(3))
-Button(frame_hms_alinhado, text="-1M", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
-       command=lambda: alterar_minutos(-1), width=3, bd=0).pack(side="left", padx=(1, 5), ipady=calcular_pading(3))
+BotaoMetal(frame_hms_alinhado, text="+1M", fonte=("Arial", calcular_fonte(12), "bold"), ativo=False, raio=6,
+          padding_x=8, bg_pai="#0b0f1a", command=lambda: alterar_minutos(1)).pack(side="left", padx=1)
+BotaoMetal(frame_hms_alinhado, text="-1M", fonte=("Arial", calcular_fonte(12), "bold"), ativo=False, raio=6,
+          padding_x=8, bg_pai="#0b0f1a", command=lambda: alterar_minutos(-1)).pack(side="left", padx=(1, 5))
 
 Label(frame_hms_alinhado, text=":", font=("Arial", calcular_fonte(18), "bold"), bg="#0b0f1a", fg="#dfe9ec").pack(
     side="left", padx=2)
@@ -2576,10 +2650,10 @@ entry_segundos.insert(0, "00")
 entry_segundos.pack(side="left", padx=2, ipady=calcular_pading(5))
 entry_segundos.bind("<KeyRelease>", lambda e: atualizar_tempo_por_inputs())
 
-Button(frame_hms_alinhado, text="+5S", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
-       command=lambda: alterar_segundos(5), width=3, bd=0).pack(side="left", padx=1, ipady=calcular_pading(3))
-Button(frame_hms_alinhado, text="-5S", font=("Arial", calcular_fonte(12), "bold"), bg="#1f2937", fg="#dfe9ec",
-       command=lambda: alterar_segundos(-5), width=3, bd=0).pack(side="left", padx=1, ipady=calcular_pading(3))
+BotaoMetal(frame_hms_alinhado, text="+5S", fonte=("Arial", calcular_fonte(12), "bold"), ativo=False, raio=6,
+          padding_x=8, bg_pai="#0b0f1a", command=lambda: alterar_segundos(5)).pack(side="left", padx=1)
+BotaoMetal(frame_hms_alinhado, text="-5S", fonte=("Arial", calcular_fonte(12), "bold"), ativo=False, raio=6,
+          padding_x=8, bg_pai="#0b0f1a", command=lambda: alterar_segundos(-5)).pack(side="left", padx=1)
 
 Label(frame_linha_tempo_total, text="|", font=("Arial", calcular_fonte(12)), bg="#0b0f1a", fg="#1f2937").pack(
     side="left", padx=4)
@@ -2626,17 +2700,16 @@ etiquetas_iniciais = ["30s", "1m", "2m", "3m", "5m", "10m", "15m", "20m", "30m",
 
 
 # 💥 BOTAO ISOLADO: Cola isto dentro da tua barra de comandos antiga
-btn_reset_avktimer = Button(
+btn_reset_avktimer = BotaoMetal(
     frame_comandos_principais if 'frame_comandos_principais' in globals() else container,
-    text="🔄 RESET",
-    font=("Arial", calcular_fonte(12), "bold") if 'calcular_fonte' in globals() else ("Arial", 12, "bold"),
-    bg="#b45309",
-    fg="#000000",
-    bd=0,
+    text="RESET",
+    fonte=("Arial", calcular_fonte(12), "bold") if 'calcular_fonte' in globals() else ("Arial", 12, "bold"),
+    raio=12, padding_x=26,
+    bg_pai="#0b0f1a",
     command=forcar_reset_timer_via_botao
 )
 # Lembra-te de o posicionar usando o teu método antigo (seja .pack(side="left") ou .grid(row=0, column=X))
-btn_reset_avktimer.pack(side="left", padx=4, ipady=10) # 👈 Ajusta o .pack ou .grid conforme os teus outros botões!
+btn_reset_avktimer.pack(side="left", padx=4) # 👈 Ajusta o .pack ou .grid conforme os teus outros botões!
 
 
 
@@ -2650,7 +2723,7 @@ def capturar_para_preset(idx):
 
         valores_presets[idx] = segundos_totais
         texto_formatado = formatar_tempo_completo(segundos_totais)
-        botoes_presets_referencias[idx].config(text=texto_formatado)
+        botoes_presets_referencias[idx].set_estado(texto=texto_formatado)
     except Exception:
         pass
 
@@ -2658,12 +2731,13 @@ def capturar_para_preset(idx):
 # Desenha as duas linhas de botões (SET superior e Disparo de tempo inferior)
 for i in range(10):
     l, c = (i // 5) * 2, i % 5
-    Button(frame_grid_presets, text="SET", font=("Arial", calcular_fonte(7), "bold"), bg="#374151", fg="#dfe9ec", bd=0,
-           command=lambda idx=i: capturar_para_preset(idx)).grid(row=l, column=c, padx=3, pady=(1, 1), ipady=1,
-                                                                 sticky="ew")
-    bp = Button(frame_grid_presets, text=etiquetas_iniciais[i], font=("Arial", calcular_fonte(10), "bold"),
-                bg="#1a2333", fg="#3fd6ea", bd=0, command=lambda idx=i: aplicar_preset_index(idx))
-    bp.grid(row=l + 1, column=c, padx=3, pady=(1, 4), ipady=calcular_pading(8), sticky="ew")
+    BotaoMetal(frame_grid_presets, text="SET", fonte=("Arial", calcular_fonte(7), "bold"), ativo=True,
+              raio=5, padding_x=8, bg_pai="#0b0f1a",
+              command=lambda idx=i: capturar_para_preset(idx)).grid(row=l, column=c, padx=3, pady=(1, 1), sticky="")
+    bp = BotaoMetal(frame_grid_presets, text=etiquetas_iniciais[i], fonte=("Arial", calcular_fonte(10), "bold"),
+                    ativo=False, raio=8, padding_x=8, bg_pai="#0b0f1a",
+                    command=lambda idx=i: aplicar_preset_index(idx))
+    bp.grid(row=l + 1, column=c, padx=3, pady=(1, 4), sticky="")
     botoes_presets_referencias.append(bp)
 # =========================================================================
 # ⏱️ NOVO VISOR DE PREVIEW DO RELÓGIO (MONITORIZAÇÃO DA RÉGIE ISOLADA)
@@ -2673,7 +2747,7 @@ Label(sub_col_esquerda, text="―" * 35, font=("Arial", calcular_fonte(8)), bg="
 lbl_tit_preview = Label(sub_col_esquerda, text="⏱️ MONITOR DE CONTAGEM REGRESSIVA:", font=("Arial", calcular_fonte(9), "bold"), bg="#0b0f1a", fg="#dfe9ec")
 lbl_tit_preview.pack(anchor="w", pady=(2, 4))
 
-frame_visor_preview = Frame(sub_col_esquerda, bg="#080b12", bd=0)
+frame_visor_preview = Frame(sub_col_esquerda, bg="#0d1420", bd=0)
 frame_visor_preview.pack(fill="both", expand=True, ipady=15, pady=(2, 5))
 
 # 💥 INJEÇÃO DE VARIÁVEL EXCLUSIVA DA RÉGIE (Acaba com os fantasmas e colisões!)
@@ -2684,7 +2758,7 @@ lbl_tempo_preview = Label(
     frame_visor_preview,
     textvariable=lbl_preview_regie_tk,
     font=("Arial", calcular_fonte(32), "bold"),
-    bg="#080b12",
+    bg="#0d1420",
     fg="#3fd6ea"
 )
 lbl_tempo_preview.pack(expand=True, fill="both")
@@ -2702,22 +2776,10 @@ sub_col_direita.pack(side="right", fill="both", expand=True, padx=(10, 0))
 # PAINEL DE MENSAGENS EM TEMPO REAL (MOTO PROTEGIDO CONTRA FUROS VISUAIS)
 # =========================================================================
 def atualizar_estilo_botao_msg(botao, texto):
-    """Calcula o tamanho do texto e ajusta a fonte dinamicamente para caber no botão."""
-    total_caracteres = len(texto)
-    if total_caracteres <= 6:
-        tamanho_fonte = calcular_fonte(12)
-        texto_formatado = texto
-    elif total_caracteres <= 11:
-        tamanho_fonte = calcular_fonte(10)
-        texto_formatado = texto
-    elif total_caracteres <= 16:
-        tamanho_fonte = calcular_fonte(9)
-        texto_formatado = texto
-    else:
-        tamanho_fonte = calcular_fonte(8)
-        metade = total_caracteres // 2
-        texto_formatado = texto[:metade] + "\n" + texto[metade:]
-    botao.config(text=texto_formatado, font=("Arial", tamanho_fonte, "bold"))
+    """Atualiza o texto do botão de preset -- o BotaoMetal já alarga a própria
+    largura sozinho para caber o texto, por isso já não é preciso encolher a
+    fonte manualmente como no tk.Button antigo."""
+    botao.set_estado(texto=texto)
 
 
 lbl_tit_msg = Label(sub_col_direita, text="MENSAGEM EM TEMPO REAL:", font=("Arial", calcular_fonte(9), "bold"),
@@ -2733,13 +2795,13 @@ entry_mensagem = Entry(frame_msg_row, font=("Arial", calcular_fonte(11), "bold")
                        insertbackground="#dfe9ec")
 entry_mensagem.grid(row=0, column=0, padx=(0, 4), ipady=calcular_pading(4), sticky="ew")
 
-btn_enviar_msg = Button(frame_msg_row, text="ENVIAR", font=("Arial", calcular_fonte(8), "bold"), bg="#0d9488",
-                        fg="white", bd=0, command=enviar_mensagem_ecra)
-btn_enviar_msg.grid(row=0, column=1, padx=2, sticky="nsew")
+btn_enviar_msg = BotaoMetal(frame_msg_row, text="ENVIAR", fonte=("Arial", calcular_fonte(8), "bold"),
+                            raio=8, padding_x=14, bg_pai="#0b0f1a", command=enviar_mensagem_ecra)
+btn_enviar_msg.grid(row=0, column=1, padx=2, sticky="")
 
-btn_limpar_msg = Button(frame_msg_row, text="LIMPAR", font=("Arial", calcular_fonte(8), "bold"), bg="#b91c1c",
-                        fg="white", bd=0, command=limpar_mensagem_ecra)
-btn_limpar_msg.grid(row=0, column=2, padx=(2, 0), sticky="nsew")
+btn_limpar_msg = BotaoMetal(frame_msg_row, text="LIMPAR", fonte=("Arial", calcular_fonte(8), "bold"),
+                            ativo=False, raio=8, padding_x=14, bg_pai="#0b0f1a", command=limpar_mensagem_ecra)
+btn_limpar_msg.grid(row=0, column=2, padx=(2, 0), sticky="")
 
 # =========================================================================
 # GRELHA DE PRESETS DE MENSAGENS RÁPIDAS (ADAPTATIVA 5 COLUNAS)
@@ -2759,16 +2821,15 @@ for i in range(10):
     l, c = (i // 5) * 2, i % 5
 
     # Botão superior para CAPTURAR o texto atual da entry_mensagem para o preset
-    Button(frame_grelha_msg_presets, text="M-SET", font=("Arial", calcular_fonte(7), "bold"), bg="#374151",
-           fg="#dfe9ec", bd=0,
-           command=lambda idx=i: capturar_preset_msg(idx)).grid(row=l, column=c, padx=2, pady=(1, 1), ipady=1,
-                                                                sticky="ew")
+    BotaoMetal(frame_grelha_msg_presets, text="M-SET", fonte=("Arial", calcular_fonte(7), "bold"), ativo=True,
+              raio=5, padding_x=8, bg_pai="#0b0f1a",
+              command=lambda idx=i: capturar_preset_msg(idx)).grid(row=l, column=c, padx=2, pady=(1, 1), sticky="")
 
     # Garante que o teu botão bm vai buscar o texto de arranque à tua nova lista:
-    bm = Button(frame_grelha_msg_presets, text=textos_presets_msg[i], font=("Arial", calcular_fonte(9), "bold"),
-                bg="#1a2333", fg="#3fd6ea", bd=0, command=lambda idx=i: disparar_preset_msg(idx))
+    bm = BotaoMetal(frame_grelha_msg_presets, text=textos_presets_msg[i], fonte=("Arial", calcular_fonte(9), "bold"),
+                    ativo=False, raio=8, padding_x=10, bg_pai="#0b0f1a", command=lambda idx=i: disparar_preset_msg(idx))
 
-    bm.grid(row=l + 1, column=c, padx=2, pady=(1, 4), ipady=calcular_pading(6), sticky="nsew")
+    bm.grid(row=l + 1, column=c, padx=2, pady=(1, 4), sticky="")
 
     # Guarda a referência para podermos encolher a fonte dinamicamente via atualizar_estilo_botao_msg()
     botoes_msg_referencias.append(bm)
@@ -2805,10 +2866,10 @@ seletor_som_t1.set("Beep") # 💥 FIXA O BEEP DE ARRANQUE PARA NÃO FICAR EM BRA
 seletor_som_t1.grid(row=1, column=2, padx=2, sticky="ew")
 seletor_som_t1.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_som_via_painel())
 
-Button(frame_matriz_direita, text="BUSCAR 1", font=fonte_botoes_pequenos, bg="#0891b2", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(1)).grid(row=1, column=3, padx=2, sticky="nsew", ipady=1)
+BotaoMetal(frame_matriz_direita, text="BUSCAR 1", fonte=fonte_botoes_pequenos, raio=6, padding_x=8, bg_pai="#0b0f1a", command=lambda: procurar_e_importar_som_para_gatilho(1)).grid(row=1, column=3, padx=2, sticky="")
 lbl_som_feedback1 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_som_feedback1.grid(row=1, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(1,), daemon=True).start()).grid(row=1, column=5, padx=2, sticky="nsew")
+BotaoMetal(frame_matriz_direita, text="TEST", fonte=fonte_botoes_pequenos, ativo=False, raio=6, padding_x=8, bg_pai="#0b0f1a", command=lambda: threading.Thread(target=tocar_som_background, args=(1,), daemon=True).start()).grid(row=1, column=5, padx=2, sticky="")
 
 # --- LINHA T2 ---
 Label(frame_matriz_direita, text="T2:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=2, column=0, padx=2, pady=3, sticky="w")
@@ -2821,10 +2882,10 @@ seletor_som_t2.set("Beep") # 💥 FIXA O BEEP DE ARRANQUE PARA NÃO FICAR EM BRA
 seletor_som_t2.grid(row=2, column=2, padx=2, sticky="ew")
 seletor_som_t2.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_som_via_painel())
 
-Button(frame_matriz_direita, text="BUSCAR 2", font=fonte_botoes_pequenos, bg="#0891b2", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(2)).grid(row=2, column=3, padx=2, sticky="nsew", ipady=1)
+BotaoMetal(frame_matriz_direita, text="BUSCAR 2", fonte=fonte_botoes_pequenos, raio=6, padding_x=8, bg_pai="#0b0f1a", command=lambda: procurar_e_importar_som_para_gatilho(2)).grid(row=2, column=3, padx=2, sticky="")
 lbl_som_feedback2 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_som_feedback2.grid(row=2, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(2,), daemon=True).start()).grid(row=2, column=5, padx=2, sticky="nsew")
+BotaoMetal(frame_matriz_direita, text="TEST", fonte=fonte_botoes_pequenos, ativo=False, raio=6, padding_x=8, bg_pai="#0b0f1a", command=lambda: threading.Thread(target=tocar_som_background, args=(2,), daemon=True).start()).grid(row=2, column=5, padx=2, sticky="")
 
 # --- LINHA T3 ---
 Label(frame_matriz_direita, text="T3:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=3, column=0, padx=2, pady=3, sticky="w")
@@ -2837,10 +2898,10 @@ seletor_som_t3.set("Beep") # 💥 FIXA O BEEP DE ARRANQUE PARA NÃO FICAR EM BRA
 seletor_som_t3.grid(row=3, column=2, padx=2, sticky="ew")
 seletor_som_t3.bind("<<ComboboxSelected>>", lambda e: atualizar_gatilhos_som_via_painel())
 
-Button(frame_matriz_direita, text="BUSCAR 3", font=fonte_botoes_pequenos, bg="#0891b2", fg="white", bd=0, command=lambda: procurar_e_importar_som_para_gatilho(3)).grid(row=3, column=3, padx=2, sticky="nsew", ipady=1)
+BotaoMetal(frame_matriz_direita, text="BUSCAR 3", fonte=fonte_botoes_pequenos, raio=6, padding_x=8, bg_pai="#0b0f1a", command=lambda: procurar_e_importar_som_para_gatilho(3)).grid(row=3, column=3, padx=2, sticky="")
 lbl_som_feedback3 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_som_feedback3.grid(row=3, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=lambda: threading.Thread(target=tocar_som_background, args=(3,), daemon=True).start()).grid(row=3, column=5, padx=2, sticky="nsew")
+BotaoMetal(frame_matriz_direita, text="TEST", fonte=fonte_botoes_pequenos, ativo=False, raio=6, padding_x=8, bg_pai="#0b0f1a", command=lambda: threading.Thread(target=tocar_som_background, args=(3,), daemon=True).start()).grid(row=3, column=5, padx=2, sticky="")
 
 # Divisória de Estúdio
 Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#0b0f1a", fg="#1f2937").grid(row=4, column=0, columnspan=6, pady=4)
@@ -2867,7 +2928,7 @@ entry_http_url1.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_paine
 
 lbl_http_feedback1 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_http_feedback1.grid(row=6, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=testar_automacao_h1).grid(row=6, column=5, padx=2, sticky="nsew")
+BotaoMetal(frame_matriz_direita, text="TEST", fonte=fonte_botoes_pequenos, ativo=False, raio=6, padding_x=8, bg_pai="#0b0f1a", command=testar_automacao_h1).grid(row=6, column=5, padx=2, sticky="")
 
 # --- LINHA H2 ---
 Label(frame_matriz_direita, text="H2:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=7, column=0, padx=2, pady=3, sticky="w")
@@ -2886,7 +2947,7 @@ entry_http_url2.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_paine
 
 lbl_http_feedback2 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_http_feedback2.grid(row=7, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=testar_automacao_h2).grid(row=7, column=5, padx=2, sticky="nsew")
+BotaoMetal(frame_matriz_direita, text="TEST", fonte=fonte_botoes_pequenos, ativo=False, raio=6, padding_x=8, bg_pai="#0b0f1a", command=testar_automacao_h2).grid(row=7, column=5, padx=2, sticky="")
 # --- LINHA H3 (CORRIGIDA COM BG DRACULA OPACO) ---
 Label(frame_matriz_direita, text="H3:", font=("Arial", calcular_fonte(8), "bold"), bg="#0b0f1a", fg="#3fd6ea").grid(row=8, column=0, padx=2, pady=3, sticky="w")
 entry_http_seg3 = Entry(frame_matriz_direita, width=8, font=("Arial", calcular_fonte(9), "bold"), bg="#141b28", fg="#3fd6ea", bd=0, justify="center")
@@ -2904,7 +2965,7 @@ entry_http_url3.bind("<KeyRelease>", lambda e: atualizar_gatilhos_http_via_paine
 
 lbl_http_feedback3 = Label(frame_matriz_direita, text="---", font=("Arial", calcular_fonte(8), "bold"), bg="#141b28", fg="#7d97a3", width=10)
 lbl_http_feedback3.grid(row=8, column=4, padx=2, sticky="nsew")
-Button(frame_matriz_direita, text="TEST", font=fonte_botoes_pequenos, bg="#374151", fg="#dfe9ec", bd=0, command=testar_automacao_h3).grid(row=8, column=5, padx=2, sticky="nsew")
+BotaoMetal(frame_matriz_direita, text="TEST", fonte=fonte_botoes_pequenos, ativo=False, raio=6, padding_x=8, bg_pai="#0b0f1a", command=testar_automacao_h3).grid(row=8, column=5, padx=2, sticky="")
 
 # Divisória de Estúdio (Pintada em bg="#0b0f1a")
 Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#0b0f1a", fg="#1f2937").grid(row=9, column=0, columnspan=6, pady=4)
@@ -2916,34 +2977,35 @@ frame_botoes_toggle_linha = Frame(frame_matriz_direita, bg="#0b0f1a")
 frame_botoes_toggle_linha.grid(row=10, column=0, columnspan=6, sticky="ew", pady=(2, 2))
 frame_botoes_toggle_linha.columnconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
 
-btn_modo_zero = Button(frame_botoes_toggle_linha, text="MODO NEGATIVO", bg="#0891b2", fg="white", font=fonte_botoes_trig, bd=0, command=toggle_modo_zero)
-btn_modo_zero.grid(row=0, column=0, padx=1, pady=2, sticky="nsew", ipady=2)
+btn_modo_zero = BotaoMetal(frame_botoes_toggle_linha, text="MODO NEGATIVO", ativo=False, raio=8,
+                           fonte=fonte_botoes_trig, padding_x=14, bg_pai="#0b0f1a", command=toggle_modo_zero)
+btn_modo_zero.grid(row=0, column=0, padx=1, pady=2, sticky="")
 
-btn_alternar_web = Button(frame_botoes_toggle_linha, text="MODO RELÓGIO", bg="#0e7490", fg="#dfe9ec", font=fonte_botoes_trig, bd=0, command=alternar_modo_visualizacao)
-btn_alternar_web.grid(row=0, column=1, padx=1, pady=2, sticky="nsew", ipady=2)
-
-altura_botao_toggle = calcular_fonte(26)
+btn_alternar_web = BotaoMetal(frame_botoes_toggle_linha, text="MODO RELÓGIO", ativo=False, raio=8,
+                              fonte=fonte_botoes_trig, padding_x=14, bg_pai="#0b0f1a", command=alternar_modo_visualizacao)
+btn_alternar_web.grid(row=0, column=1, padx=1, pady=2, sticky="")
 
 btn_ecran_on = BotaoMetal(frame_botoes_toggle_linha, text="ECRÃ: LIGAR", command=generar_janela_nativa_directx,
-                          ativo=True, raio=9, fonte=fonte_botoes_trig, height=altura_botao_toggle, bg_pai="#0b0f1a")
-btn_ecran_on.grid(row=0, column=2, padx=1, pady=2, sticky="nsew")
+                          ativo=True, raio=8, fonte=fonte_botoes_trig, padding_x=24, bg_pai="#0b0f1a")
+btn_ecran_on.grid(row=0, column=2, padx=1, pady=2, sticky="")
 
 btn_ecran_off = BotaoMetal(frame_botoes_toggle_linha, text="ECRÃ: DESLIGAR", command=fechar_ecran_nativo_botao,
-                           ativo=True, raio=9, fonte=fonte_botoes_trig, height=altura_botao_toggle, bg_pai="#0b0f1a")
-btn_ecran_off.grid(row=0, column=3, padx=1, pady=2, sticky="nsew")
+                           ativo=True, raio=8, fonte=fonte_botoes_trig, padding_x=24, bg_pai="#0b0f1a")
+btn_ecran_off.grid(row=0, column=3, padx=1, pady=2, sticky="")
 
-btn_toggle_piscar = BotaoMetal(frame_botoes_toggle_linha, text="💥 PISCAR", command=toggle_permissao_piscar,
-                               ativo=permitir_piscar_pos_zero, raio=9, fonte=fonte_botoes_trig,
-                               height=altura_botao_toggle, bg_pai="#0b0f1a")
-btn_toggle_piscar.grid(row=0, column=4, padx=1, pady=2, sticky="nsew")
+btn_toggle_piscar = BotaoMetal(frame_botoes_toggle_linha, text="PISCAR", command=toggle_permissao_piscar,
+                               ativo=permitir_piscar_pos_zero, raio=8, fonte=fonte_botoes_trig,
+                               padding_x=24, bg_pai="#0b0f1a")
+btn_toggle_piscar.grid(row=0, column=4, padx=1, pady=2, sticky="")
 
-btn_mute_som = BotaoMetal(frame_botoes_toggle_linha, text="🔊 SOM: ON", command=toggle_mute_som,
-                          ativo=som_ativado, raio=9, fonte=fonte_botoes_trig,
-                          height=altura_botao_toggle, bg_pai="#0b0f1a")
-btn_mute_som.grid(row=0, column=5, padx=1, pady=2, sticky="nsew")
+btn_mute_som = BotaoMetal(frame_botoes_toggle_linha, text="SOM: ON", command=toggle_mute_som,
+                          ativo=som_ativado, raio=8, fonte=fonte_botoes_trig,
+                          padding_x=24, bg_pai="#0b0f1a")
+btn_mute_som.grid(row=0, column=5, padx=1, pady=2, sticky="")
 
-btn_parar_som_emerg = Button(frame_botoes_toggle_linha, text="🛑 PARAR\n SOM", bg="#7f1d1d", fg="white", font=fonte_botoes_trig, bd=0, command=parar_audio_nativo_sistema)
-btn_parar_som_emerg.grid(row=0, column=6, padx=1, pady=2, sticky="nsew", ipady=2)
+btn_parar_som_emerg = BotaoMetal(frame_botoes_toggle_linha, text="PARAR SOM", raio=8,
+                                 fonte=fonte_botoes_trig, padding_x=12, bg_pai="#0b0f1a", command=parar_audio_nativo_sistema)
+btn_parar_som_emerg.grid(row=0, column=6, padx=1, pady=2, sticky="")
 
 # 💥 CORREÇÃO BROADCAST: Fundo da linha divisória final cravado em #0b0f1a para extinguir a transparência!
 Label(frame_matriz_direita, text="―" * (35 if SISTEMA_MAC else 65), font=("Arial", calcular_fonte(8)), bg="#0b0f1a", fg="#1f2937").grid(row=11, column=0, columnspan=6, pady=4)
@@ -2958,32 +3020,40 @@ frame_botoes_acao.pack(fill="x", side="top", expand=True, pady=(10, 5), padx=(0,
 frame_botoes_acao.columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
 
 pading_botao_core = 8 if SISTEMA_MAC else calcular_pading(8)
-altura_botao_core = calcular_fonte(34)
 fonte_botao_core = ("Arial", calcular_fonte(11), "bold")
 
+# Todos os 6 botões de ação levam a MESMA largura/altura (a do texto mais
+# comprido, "ATUALIZAR"/"REINICIAR"), para a fila ficar uniforme como no
+# mockup em vez de cada botão ter uma largura diferente conforme o texto
+_textos_botoes_core = ["INICIAR", "PAUSAR", "ATUALIZAR", "STOP", "REINICIAR", "📋 CUES"]
+_fonte_pil_core = _carregar_fonte_pil(fonte_botao_core[1], True)
+_bbox_core = [ImageDraw.Draw(Image.new("RGB", (1, 1))).textbbox((0, 0), t, font=_fonte_pil_core) for t in _textos_botoes_core]
+largura_botao_core = max(b[2] - b[0] for b in _bbox_core) + 48 * 2
+altura_botao_core = int(max(b[3] - b[1] for b in _bbox_core) * 3.2)
+
 BotaoMetal(frame_botoes_acao, text="INICIAR", command=iniciar_timer,
-           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
-).grid(row=0, column=0, padx=6, pady=pading_botao_core, sticky="nsew")
+           largura=largura_botao_core, altura=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=0, padx=6, pady=pading_botao_core, sticky="")
 
 BotaoMetal(frame_botoes_acao, text="PAUSAR", command=pausar_timer,
-           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
-).grid(row=0, column=1, padx=6, pady=pading_botao_core, sticky="nsew")
+           largura=largura_botao_core, altura=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=1, padx=6, pady=pading_botao_core, sticky="")
 
 BotaoMetal(frame_botoes_acao, text="ATUALIZAR", command=executar_override_tempo,
-           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
-).grid(row=0, column=2, padx=6, pady=pading_botao_core, sticky="nsew")
+           largura=largura_botao_core, altura=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=2, padx=6, pady=pading_botao_core, sticky="")
 
 BotaoMetal(frame_botoes_acao, text="STOP", command=parar_timer,
-           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
-).grid(row=0, column=3, padx=6, pady=pading_botao_core, sticky="nsew")
+           largura=largura_botao_core, altura=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=3, padx=6, pady=pading_botao_core, sticky="")
 
 BotaoMetal(frame_botoes_acao, text="REINICIAR", command=reiniciar_timer,
-           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
-).grid(row=0, column=4, padx=6, pady=pading_botao_core, sticky="nsew")
+           largura=largura_botao_core, altura=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=4, padx=6, pady=pading_botao_core, sticky="")
 
-BotaoMetal(frame_botoes_acao, text="📋 CUES", command=abrir_janela_cues,
-           height=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
-).grid(row=0, column=5, padx=6, pady=pading_botao_core, sticky="nsew")
+BotaoMetal(frame_botoes_acao, text="CUES", command=abrir_janela_cues,
+           largura=largura_botao_core, altura=altura_botao_core, fonte=fonte_botao_core, bg_pai="#0b0f1a"
+).grid(row=0, column=5, padx=6, pady=pading_botao_core, sticky="")
 
 # --- SYSTEM TRAY (PROTEÇÃO HÍBRIDA PARA WINDOWS E MAC) ---
 try:

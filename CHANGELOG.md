@@ -188,6 +188,39 @@ publica os dois como Release no GitHub.
   Os botões pequenos (SET/TEST/M-SET/BUSCAR, dezenas deles) ficaram de
   fora de propósito -- só a cor sólida da paleta nova, sem o efeito metal.
 
+## v2.2 — Corrige transparência + botão "metal" reescrito com PIL em todos os botões
+
+- **Bug real**: `-transparentcolor` (o truque do Windows para cantos
+  arredondados) ficou com a mesma cor (`#080b12`) de vários painéis
+  visíveis (barra de arrastar, IP, preview da contagem) depois de uma
+  substituição em massa de cores na v2.0 -- esses painéis ficavam
+  transparentes/a mostrar o ambiente de trabalho por trás. Separado:
+  `#080b12` fica só para a moldura invisível, painéis visíveis passam a
+  `#0d1420`.
+- A primeira versão do `BotaoMetal` (Canvas desenhado à mão, máscara de
+  cantos por arcos) tinha serrilhado visível ("pontos") nos cantos e nas
+  bordas, e o dimensionamento por omissão do Canvas (200px) esmagava
+  botões vizinhos com texto mais comprido (ex: MODO NEGATIVO/MODO
+  RELÓGIO ficavam sobrepostos). Reescrito para pré-renderizar cada botão
+  como imagem PIL com supersampling 4x + downscale LANCZOS (cantos
+  lisos), gradiente rápido (coluna de 1px esticada em vez de um loop por
+  pixel), brilho via `GaussianBlur`, e largura/altura calculadas a partir
+  do próprio texto (`textbbox`) -- os botões já não cortam nem sobrepõem
+  texto.
+- O efeito "metal" passou a aplicar-se a **todos** os botões da app (SET,
+  TEST, M-SET, BUSCAR, A-/A+, +1H/-1H/etc, RESET, painel de Cues), não só
+  aos principais -- só os 3 botões de moldura da janela (fechar,
+  minimizar, maximizar) ficaram de fora, por serem controlo de sistema.
+- Textos com emoji (💥, 🔊, 🛑, 🔄, 📋, 🗑, ▲, ▼, ▶, 🟢, ⚪) foram
+  removidos dos botões: a fonte TTF usada para desenhar o texto no PIL
+  (Arial Bold) não tem glifos de emoji, e apareciam como quadrados vazios.
+- Os botões SET e M-SET (que capturam o valor atual para um preset) ficam
+  agora com o brilho "ativo" ligado permanentemente, para se distinguirem
+  claramente dos botões de valor por baixo (que ficam apagados) -- antes
+  liam-se todos como um bloco só.
+- Contorno/brilho do estado ativo tornado mais fino e discreto (menos
+  espessura de linha, menos desfoque) a pedido explícito.
+
 ## Por verificar/decidir (não alterado)
 
 - `/api/som/set_webhooks` só permite definir remotamente o webhook H1 (H2/H3 só
