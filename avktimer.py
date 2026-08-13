@@ -88,7 +88,7 @@ if not SISTEMA_MAC:
         pass
 
 root = Tk()
-root.title("Cue Timer v2.2")
+root.title("Cue Timer v2.3")
 root.withdraw()
 
 LARGURA_ECRA = root.winfo_screenwidth()
@@ -1062,9 +1062,7 @@ def generar_janela_nativa_directx():
         return
 
     janela_secundaria = Toplevel(root)
-    janela_secundaria.title("Cue Timer Display")
     janela_secundaria.configure(bg="#000000")
-    tamanho_fonte_timer_atual = 150
     estado_mensagem_anterior = ""
 
     LARGURA_PRINCIPAL = root.winfo_screenwidth()
@@ -1093,6 +1091,21 @@ def generar_janela_nativa_directx():
     except Exception:
         pass
 
+    # 🚨 SEM ECRÃ EXTERNO: a janela de palco fullscreen ia sempre parar a um
+    # sítio fora do ecrã principal (posicionada para a "direita" de um segundo
+    # monitor que não existe), invisível ao operador -- que carregava em
+    # "ECRÃ: LIGAR" sem qualquer confirmação visual de que algo tinha
+    # acontecido. Sem segundo monitor, abre antes uma janelinha pequena,
+    # centrada no próprio ecrã, com barra de título (fácil de ver e fechar).
+    if not tem_segundo_monitor:
+        largura_alvo, altura_alvo = 480, 270
+        monitor_alvo_x = int((LARGURA_PRINCIPAL - largura_alvo) / 2)
+        monitor_alvo_y = int((ALTURA_PRINCIPAL - altura_alvo) / 2)
+
+    tamanho_fonte_timer_atual = (140 if SISTEMA_MAC else 150) if tem_segundo_monitor else 40
+    janela_secundaria.title("Cue Timer Display" if tem_segundo_monitor
+                            else "Cue Timer — Pré-visualização (sem ecrã externo detetado)")
+
     if SISTEMA_MAC:
         try:
             # 1. Isola o comportamento do espaço de trabalho (Auxiliary space 128)
@@ -1112,20 +1125,24 @@ def generar_janela_nativa_directx():
         except Exception:
             janela_secundaria.geometry(f"{largura_alvo}x{altura_alvo}+{monitor_alvo_x}+{monitor_alvo_y}")
     else:
-        # Windows Direct-X Bypass clássico
         janela_secundaria.geometry(f"{largura_alvo}x{altura_alvo}+{monitor_alvo_x}+{monitor_alvo_y}")
-        janela_secundaria.overrideredirect(True)
+        if tem_segundo_monitor:
+            # Windows Direct-X Bypass clássico -- sem moldura, ocupa o monitor externo inteiro
+            janela_secundaria.overrideredirect(True)
+        # Sem segundo monitor: mantém a moldura normal (título + botão fechar)
+        # para a janelinha ser inequivocamente visível e fácil de fechar à mão.
 
     janela_secundaria.bind("<Double-Button-1>", lambda e: fechar_ecran_nativo_botao())
 
     lbl_tempo_secundario = Label(janela_secundaria, text="00:00:00",
-                                 font=(fonte_atual, calcular_fonte(140 if SISTEMA_MAC else 150), "bold"), bg="#000000",
+                                 font=(fonte_atual, calcular_fonte(tamanho_fonte_timer_atual), "bold"), bg="#000000",
                                  fg="#ffffff")
     lbl_tempo_secundario.pack(expand=True, pady=0)
 
+    tamanho_fonte_msg_secundaria = max(10, int(tamanho_fonte_timer_atual * 55 / 150))
     frame_conteudo_secundario = Frame(janela_secundaria, bg="#000000")
-    lbl_msg_secundaria = Label(frame_conteudo_secundario, text="", font=(fonte_atual, calcular_fonte(55), "bold"),
-                               bg="#000000", fg="#3fd6ea", wraplength=1200, justify="center")
+    lbl_msg_secundaria = Label(frame_conteudo_secundario, text="", font=(fonte_atual, calcular_fonte(tamanho_fonte_msg_secundaria), "bold"),
+                               bg="#000000", fg="#3fd6ea", wraplength=int(largura_alvo * 0.9), justify="center")
     lbl_msg_secundaria.pack(expand=False, pady=20)
 
 

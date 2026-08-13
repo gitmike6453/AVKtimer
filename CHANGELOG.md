@@ -221,6 +221,26 @@ publica os dois como Release no GitHub.
 - Contorno/brilho do estado ativo tornado mais fino e discreto (menos
   espessura de linha, menos desfoque) a pedido explícito.
 
+## v2.3 — Ícone novo + correção do ecrã de palco sem monitor externo
+
+- **Ícone da app trocado** (`assets/app.ico`, `assets/app.icns`, e o ícone
+  usado no site things-on): o antigo era um diamante azul/verde sem
+  relação nenhuma com a paleta nova. Novo desenho: cronómetro em glow
+  verde-cyan sobre fundo escuro arredondado, gerado com a mesma técnica
+  do `BotaoMetal` (supersampling + `GaussianBlur`), consistente com o
+  resto da interface. Site atualizado para usar a mesma imagem em vez do
+  ícone SVG antigo, para o ícone do site e da app deixarem de ser
+  desenhos diferentes.
+- **Bug real corrigido**: ao clicar em "ECRÃ: LIGAR" sem um segundo
+  monitor ligado, a janela de palco fullscreen abria sempre posicionada
+  à direita do ecrã principal (pressupondo um monitor secundário que não
+  existia) -- ficava completamente invisível, sem qualquer confirmação
+  visual de que o botão tinha feito alguma coisa. Agora, sem monitor
+  externo detetado, abre uma janela pequena (480×270) centrada no
+  próprio ecrã, com barra de título normal (fácil de ver e fechar),
+  título a avisar "sem ecrã externo detetado", e o texto/relógio
+  reduzidos proporcionalmente para caberem.
+
 ## Por verificar/decidir (não alterado)
 
 - `/api/som/set_webhooks` só permite definir remotamente o webhook H1 (H2/H3 só

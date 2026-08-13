@@ -10,19 +10,19 @@
 AppId={{AVKTIMER-STUDIO-V17-WIN}}
 AppName=Cue Timer
 AppPublisher=AVK Studio
-AppVersion=2.2
+AppVersion=2.3
 DefaultDirName={autopf}\Cue Timer
-DefaultGroupName=Cue Timer v2.2
+DefaultGroupName=Cue Timer v2.3
 AllowNoIcons=yes
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 
-VersionInfoVersion=2.2.0.0
-VersionInfoTextVersion=2.2
+VersionInfoVersion=2.3.0.0
+VersionInfoTextVersion=2.3
 
 OutputDir={#RepoRoot}Output
-OutputBaseFilename=CueTimer_Setup_v2.2
+OutputBaseFilename=CueTimer_Setup_v2.3
 SetupIconFile={#RepoRoot}assets\app.ico
 
 [Languages]
